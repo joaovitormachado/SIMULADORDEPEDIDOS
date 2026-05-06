@@ -1,9 +1,9 @@
 var DIST_NOME = '', DIST_ID = '', carrinho = {};
 var FAIXAS = [
-    { label: '25%', min: 0, max: 99.99 },
-    { label: '35%', min: 100, max: 499.99 },
-    { label: '42%', min: 500, max: 1999.99 },
-    { label: '50%', min: 2000, max: Infinity }
+    { label: '25%', min: 0, target: 500 },
+    { label: '35%', min: 500, target: 1000 },
+    { label: '42%', min: 1000, target: 2000 },
+    { label: '50%', min: 2000, target: null }
 ];
 
 var PRODUTOS = {};
@@ -20,9 +20,9 @@ function entrar() {
     document.getElementById('main-app').style.display = 'block';
 }
 
-function getFaixaIdx(total) {
+function getFaixaIdx(pvTotal) {
     for (var i = FAIXAS.length - 1; i >= 0; i--) {
-        if (total >= FAIXAS[i].min) return i;
+        if (pvTotal >= FAIXAS[i].min) return i;
     }
     return 0;
 }
@@ -36,15 +36,27 @@ function getTotal() {
     return t;
 }
 
+function getTotalPV() {
+    var t = 0;
+    Object.keys(carrinho).forEach(function (k) {
+        var it = carrinho[k];
+        t += (it.pvPerUnit || 0) * it.qty;
+    });
+    return t;
+}
+
 function onEstado() {
     var sel = document.getElementById('sel-estado');
     var busca = document.getElementById('inp-busca');
+    var badge = document.getElementById('uf-badge');
     if (sel.value) {
         busca.disabled = false;
         carrinho = {};
+        badge.textContent = '🏠 CD · ' + sel.selectedOptions[0].text;
         renderCarrinho();
     } else {
         busca.disabled = true;
+        badge.textContent = '🏠 CD · Selecione o Estado';
     }
     renderProdutos();
 }
@@ -70,8 +82,8 @@ function renderProdutos() {
         return;
     }
 
-    var totalCart = getTotal();
-    var fi = getFaixaIdx(totalCart);
+    var totalPV = getTotalPV();
+    var fi = getFaixaIdx(totalPV);
     var html = '<div class="products-grid">';
 
     lista.forEach(function (p) {
@@ -130,16 +142,33 @@ function addQty(sku, fi, delta) {
 function setQty(sku, fi, val) {
     var v = parseInt(val) || 0;
     if (v < 0) v = 0;
+    
+    var estado = document.getElementById('sel-estado').value;
+    var prod = PRODUTOS[estado].find(function(x){return x.sku===sku});
+    if(!prod) return;
+
     if (v === 0) {
         delete carrinho[sku];
     } else {
-        var estado = document.getElementById('sel-estado').value;
-        var prod = PRODUTOS[estado].find(function(x){return x.sku===sku});
-        if(!prod) return;
-        var totalNoItem = getTotal() - (carrinho[sku] ? carrinho[sku].preco * carrinho[sku].qty : 0);
-        var newFi = getFaixaIdx(totalNoItem + prod.p[fi] * v);
-        carrinho[sku] = { nome: prod.nome, sku: sku, preco: prod.p[newFi], qty: v };
+        carrinho[sku] = { 
+            nome: prod.nome, 
+            sku: sku, 
+            qty: v, 
+            pvPerUnit: prod.pv || 0,
+            pricesByFaixa: prod.p 
+        };
     }
+
+    // Recalcular faixa global baseada no novo PV total
+    var currentTotalPV = getTotalPV();
+    var newFaixaIdx = getFaixaIdx(currentTotalPV);
+
+    // Atualizar preços de TODOS os itens no carrinho para a nova faixa
+    Object.keys(carrinho).forEach(function(k) {
+        var it = carrinho[k];
+        it.preco = it.pricesByFaixa[newFaixaIdx];
+    });
+
     renderCarrinho();
     renderProdutos();
 }
@@ -148,18 +177,49 @@ function renderCarrinho() {
     var keys = Object.keys(carrinho);
     var sec = document.getElementById('cart-section');
     var tbody = document.getElementById('cart-tbody');
+    var pvTop = document.getElementById('pv-summary-top');
+    
     var total = getTotal();
+    var totalPV = getTotalPV();
+    var fi = getFaixaIdx(totalPV);
 
     if (!keys.length) {
         sec.classList.remove('visible');
+        pvTop.style.display = 'none';
         tbody.innerHTML = '';
-        document.getElementById('cart-total-val').textContent = 'R$ 0,00';
-        document.getElementById('faixa-label').textContent = '';
         return;
     }
 
     sec.classList.add('visible');
-    var fi = getFaixaIdx(total);
+    pvTop.style.display = 'block';
+
+    // UI de Progresso
+    var currentFaixa = FAIXAS[fi];
+    var nextFaixa = FAIXAS[fi + 1];
+    
+    document.getElementById('pv-total-display').textContent = totalPV.toFixed(2) + ' PV';
+    document.getElementById('discount-badge').textContent = 'Desconto: ' + currentFaixa.label;
+    
+    var progress = 0;
+    if (nextFaixa) {
+        document.getElementById('next-tier-container').style.display = 'block';
+        document.getElementById('next-tier-label').textContent = nextFaixa.label;
+        document.getElementById('next-tier-goal').textContent = nextFaixa.min + ' PV';
+        var missing = nextFaixa.min - totalPV;
+        document.getElementById('pv-missing-display').textContent = 'Faltam ' + missing.toFixed(2) + ' PV';
+        
+        // Calcular progresso entre a faixa atual e a próxima
+        var range = nextFaixa.min - currentFaixa.min;
+        var currentInRange = totalPV - currentFaixa.min;
+        progress = (currentInRange / range) * 100;
+        if (progress > 100) progress = 100;
+        if (progress < 0) progress = 0;
+    } else {
+        document.getElementById('next-tier-container').style.display = 'none';
+        progress = 100;
+    }
+    document.getElementById('pv-progress-bar').style.width = progress + '%';
+
     var rows = '';
     keys.forEach(function (k) {
         var it = carrinho[k];
@@ -167,7 +227,7 @@ function renderCarrinho() {
     });
     tbody.innerHTML = rows;
     document.getElementById('cart-total-val').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-    document.getElementById('faixa-label').textContent = 'Faixa atual: ' + FAIXAS[fi].label + ' (Simulação de pedido de R$ ' + total.toFixed(2).replace('.', ',') + ')';
+    document.getElementById('faixa-label').textContent = 'Subtotal do Pedido (com ' + currentFaixa.label + ' de desconto)';
 }
 
 function limparCarrinho() {

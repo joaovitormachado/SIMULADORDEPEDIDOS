@@ -76,10 +76,28 @@
         .btn-pdf { background: linear-gradient(135deg,#00a651,#007a3d); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: .85rem; cursor: pointer; font-weight: 600 }
         .btn-clear { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 8px 16px; font-size: .85rem; cursor: pointer; color: #555 }
         
+        /* PROGRESS BAR & PV STATUS */
+        .pv-status-container { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .pv-stats { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+        .pv-main-info { display: flex; flex-direction: column; }
+        .pv-label { font-size: 0.75rem; color: #166534; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; }
+        .pv-value { font-size: 1.5rem; font-weight: 800; color: #111; line-height: 1.2; }
+        .pv-discount-badge { background: #00a651; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; margin-top: 4px; display: inline-block; width: fit-content; }
+        
+        .pv-next-step { text-align: right; }
+        .pv-next-label { font-size: 0.72rem; color: #6b7280; margin-bottom: 2px; }
+        .pv-next-value { font-size: 0.85rem; font-weight: 700; color: #111; }
+        .pv-missing { font-size: 0.72rem; color: #00a651; font-weight: 600; }
+
+        .progress-container { background: #e5e7eb; border-radius: 10px; height: 10px; width: 100%; overflow: hidden; position: relative; }
+        .progress-bar { background: linear-gradient(90deg, #00a651, #059669); height: 100%; width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px; }
+
         @media (max-width: 640px) {
             .controls { flex-direction: column }
             .price-bands { grid-template-columns: repeat(2, 1fr) !important }
             .header { flex-direction: column; gap: 12px; text-align: center }
+            .pv-stats { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .pv-next-step { text-align: left; }
         }
     </style>
 </head>
@@ -108,7 +126,7 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <div class="cd-badge">🏠 CD &middot; Espírito Santo</div>
+                    <div class="cd-badge" id="uf-badge">🏠 CD &middot; Selecione o Estado</div>
                 </div>
             </div>
 
@@ -144,6 +162,27 @@
                     <option value="TO">Tocantins</option>
                 </select>
                 <input type="text" id="inp-busca" placeholder="🔍 SKU ou nome... ex: shake, 023K" oninput="renderProdutos()" disabled>
+            </div>
+
+            <!-- STATUS DE PV NO TOPO DO APP QUANDO TIVER ITENS -->
+            <div id="pv-summary-top" style="display:none">
+                <div class="pv-status-container">
+                    <div class="pv-stats">
+                        <div class="pv-main-info">
+                            <span class="pv-label">Volume Acumulado</span>
+                            <span class="pv-value" id="pv-total-display">0.00 PV</span>
+                            <span class="pv-discount-badge" id="discount-badge">Desconto: 25%</span>
+                        </div>
+                        <div class="pv-next-step" id="next-tier-container">
+                            <div class="pv-next-label">Próximo Nível: <span id="next-tier-label">35%</span></div>
+                            <div class="pv-next-value" id="next-tier-goal">500 PV</div>
+                            <div class="pv-missing" id="pv-missing-display">Faltam 500.00 PV</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="pv-progress-bar"></div>
+                    </div>
+                </div>
             </div>
 
             <div id="produtos-area" class="products-area">
