@@ -103,7 +103,7 @@ function popularUFs() {
     if (!select) return;
     
     // Lista de estados disponíveis na nova planilha
-    const estados = Object.keys(window.precosPorEstado || {}).sort();
+    const estados = Object.keys(precosPorEstado || {}).sort();
     
     if (estados.length === 0) {
         console.error("Erro: Base de preços não carregada.");
@@ -179,8 +179,8 @@ function getFaixaAtiva() {
  * @param {number} idxFaixa - 0=Cons, 1=25%, 2=35%, 3=42%, 4=50%
  */
 function getPrecoTabela(sku, uf, idxFaixa) {
-    if (!window.precosPorEstado || !window.precosPorEstado[uf]) return 0;
-    const precosItem = window.precosPorEstado[uf][sku];
+    if (!precosPorEstado || !precosPorEstado[uf]) return 0;
+    const precosItem = precosPorEstado[uf][sku];
     if (!precosItem) return 0;
     return precosItem[idxFaixa] || 0;
 }

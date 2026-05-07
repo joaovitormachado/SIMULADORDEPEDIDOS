@@ -1,4 +1,4 @@
-﻿const precosPorEstado = {
+var precosPorEstado = {
   "BA": {
     "1417": [
       467,
