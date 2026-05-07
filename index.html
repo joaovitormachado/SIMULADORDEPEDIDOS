@@ -55,21 +55,43 @@
             padding: 1rem;
         }
 
-        /* --- SELETOR DE ALÍQUOTAS --- */
-        .tax-selector {
+        /* --- BUSCA --- */
+        .search-container {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            box-shadow: var(--shadow);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(120, 190, 32, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        /* --- SELETOR DE UF --- */
+        .uf-selector-card {
             background: white;
             border-radius: 16px;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-
-        .tax-group {
             margin-bottom: 1rem;
-        }
-
-        .tax-group:last-child {
-            margin-bottom: 0;
+            box-shadow: var(--shadow);
         }
 
         .tax-label {
@@ -79,37 +101,6 @@
             color: var(--text-muted);
             margin-bottom: 0.5rem;
             text-transform: uppercase;
-        }
-
-        .tax-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .tax-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            background: white;
-            border-radius: 99px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            flex: 1;
-            min-width: 80px;
-        }
-
-        .tax-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .tax-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(120, 190, 32, 0.3);
         }
 
         /* --- BARRA DE PROGRESSO --- */
@@ -361,6 +352,34 @@
             background: var(--bg);
         }
 
+        .add-more-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .clear-cart-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 0.75rem;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
         .cart-summary-row {
             display: flex;
             justify-content: space-between;
@@ -378,18 +397,6 @@
             color: var(--primary);
         }
 
-        .clear-cart-btn {
-            width: 100%;
-            background: transparent;
-            border: 1px solid #ef4444;
-            color: #ef4444;
-            padding: 0.75rem;
-            border-radius: 12px;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            cursor: pointer;
-        }
-
         /* --- RESPONSIVIDADE --- */
         @media (max-width: 768px) {
             .product-grid {
@@ -399,10 +406,6 @@
                 bottom: 1rem;
                 right: 1rem;
                 padding: 0.75rem 1rem;
-            }
-            .tax-btn {
-                min-width: 60px;
-                font-size: 0.75rem;
             }
         }
     </style>
@@ -418,36 +421,20 @@
 
     <main class="container">
         
-        <!-- SELETOR DE UF E ALÍQUOTAS -->
-        <section class="tax-selector">
+        <!-- SELETOR DE UF -->
+        <section class="uf-selector-card">
             <div class="tax-group">
                 <label class="tax-label">Estado (UF) para Preços</label>
-                <select id="ufSelector" class="qty-input" style="width: 100%; height: 45px; margin-bottom: 1.5rem; background: #fff; cursor: pointer;">
+                <select id="ufSelector" class="qty-input" style="width: 100%; height: 45px; background: #fff; cursor: pointer;">
                     <!-- Populado via JS -->
                 </select>
             </div>
+        </section>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="tax-group">
-                    <label class="tax-label">Alíquota IPI</label>
-                    <div class="tax-buttons" id="ipiButtons">
-                        <button class="tax-btn active" data-value="0.05">5%</button>
-                        <button class="tax-btn" data-value="0.13">13%</button>
-                        <button class="tax-btn" data-value="0.21">21%</button>
-                        <button class="tax-btn" data-value="0.29">29%</button>
-                    </div>
-                </div>
-
-                <div class="tax-group">
-                    <label class="tax-label">Alíquota ICMS ST</label>
-                    <div class="tax-buttons" id="icmsButtons">
-                        <button class="tax-btn active" data-value="0.09">9%</button>
-                        <button class="tax-btn" data-value="0.17">17%</button>
-                        <button class="tax-btn" data-value="0.25">25%</button>
-                        <button class="tax-btn" data-value="0.33">33%</button>
-                    </div>
-                </div>
-            </div>
+        <!-- BARRA DE BUSCA -->
+        <section class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nome ou SKU do produto...">
         </section>
 
         <!-- BARRA DE PROGRESSÃO PV -->
@@ -458,7 +445,7 @@
                     <div id="pvAtual" class="pv-current">0.00</div>
                 </div>
                 <div id="proximoNivel" class="pv-target">
-                    Faltam 500.00 PV para 35%
+                    Carregando progresso...
                 </div>
             </div>
             <div class="progress-track">
@@ -493,10 +480,13 @@
         </div>
 
         <div class="cart-footer">
+            <button id="addMoreProducts" class="add-more-btn">
+                <span>➕</span> Adicionar mais produtos
+            </button>
             <button id="limparCarrinho" class="clear-cart-btn">Limpar Carrinho</button>
             
             <div class="cart-summary-row">
-                <span>Subtotal (Base)</span>
+                <span>Subtotal (Tabela)</span>
                 <span id="resumoSubtotal">R$ 0,00</span>
             </div>
             <div class="cart-summary-row">
@@ -504,15 +494,11 @@
                 <span id="resumoPV" style="font-weight: 700; color: var(--primary);">0.00</span>
             </div>
             <div class="cart-summary-row">
-                <span>Desconto Aplicado</span>
-                <span id="resumoDesconto">0%</span>
-            </div>
-            <div class="cart-summary-row" style="font-size: 0.8rem; color: var(--text-muted);">
-                <span>Impostos (IPI + ST)</span>
-                <span id="resumoImpostos">R$ 0,00</span>
+                <span>Desconto Ativo</span>
+                <span id="resumoDesconto">25%</span>
             </div>
             
-            <div id="totalFinal" class="cart-total-row" style="padding-top: 1rem; border-top: 2px solid var(--border); margin-top: 1rem;">
+            <div id="totalFinal" class="cart-total-row">
                 <span>Total Final</span>
                 <span id="resumoTotal">R$ 0,00</span>
             </div>
