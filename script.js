@@ -5,7 +5,13 @@
 
 const SUPABASE_URL = 'https://jrbzvtbpzqjehakaqscz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_JyHOGdaA9cNU9H_l4DErSA_lmTiupe5';
-let supabase;
+
+// Headers padrão para a API do Supabase
+const supabaseHeaders = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json'
+};
 
 // Estado Global
 let ufAtual = "SP";
@@ -21,10 +27,6 @@ const FAIXAS = [
     { pv: 2000, label: "50%", key: "preco_50" }
 ];
 
-// ==========================================
-// INICIALIZAÇÃO
-// ==========================================
-
 // Lista fixa de estados para evitar query pesada no Supabase
 const ESTADOS_BR = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 
@@ -32,26 +34,17 @@ const ESTADOS_BR = [
 ];
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // TESTE DIAGNÓSTICO NATIVO
+    console.log('--- TESTE DIAGNÓSTICO NATIVO INICIADO ---');
     try {
-        if (!window.supabase) throw new Error("SDK do Supabase não carregou. Verifique sua conexão ou desative bloqueadores de anúncio.");
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } catch(err) {
-        alert("Erro fatal no carregamento: " + err.message);
-        return;
-    }
-
-    // TESTE DIAGNÓSTICO SOLICITADO
-    console.log('--- SUPABASE DIAGNOSTIC TEST INICIADO ---');
-    try {
-        const { data, error } = await supabase
-            .from('produtos')
-            .select('*')
-            .limit(5);
-
-        console.log('SUPABASE DATA:', data);
-        console.log('SUPABASE ERROR:', error);
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=*&limit=5`, {
+            headers: supabaseHeaders
+        });
+        const data = await res.json();
+        console.log('STATUS DA RESPOSTA:', res.status);
+        console.log('DADOS RETORNADOS:', data);
     } catch (e) {
-        console.error('SUPABASE CATCH EXCEPTION:', e);
+        console.error('FALHA DE REDE OU CORS:', e);
     }
     console.log('-----------------------------------------');
 
@@ -88,14 +81,16 @@ async function carregarProdutosPorEstado(uf) {
         mostrarLoading(true);
         console.log(`🌐 Buscando dados no Supabase para: ${uf}...`);
         
-        const { data, error } = await supabase
-            .from('produtos')
-            .select('*')
-            .eq('estado', uf);
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?estado=eq.${uf}&select=*`, {
+            headers: supabaseHeaders
+        });
 
-        console.log("RAW SUPABASE RESPOSTA PARA " + uf + ":", { data, error });
+        if (!res.ok) {
+            throw new Error(`Erro na API: ${res.status} - ${res.statusText}`);
+        }
 
-        if (error) throw error;
+        const data = await res.json();
+        console.log("RAW NATIVE FETCH RESPOSTA PARA " + uf + ":", data);
 
         cacheEstados[uf] = data || [];
         console.log(`✅ Dados carregados para ${uf}:`, cacheEstados[uf]);
