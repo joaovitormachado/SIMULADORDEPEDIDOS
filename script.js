@@ -1,133 +1,146 @@
 // ==========================================
-// 1. VARIÁVEIS GLOBAIS E ESTADO
+// SIMULADOR DE PEDIDOS HERBALIFE
+// Dados 100% do JSON oficial: tabelas_estados_herbalife.json
+// SEM cálculos, SEM impostos, SEM conversões
 // ==========================================
+
 let ufAtual = "SP";
 let carrinho = [];
 let termoBusca = "";
+let dadosJSON = []; // Array completo do JSON
+let produtosDoEstado = []; // Filtrado pelo estado selecionado
 
 const FAIXAS = [
-    { pv: 0, label: "25%", index: 1 },
-    { pv: 500, label: "35%", index: 2 },
-    { pv: 1000, label: "42%", index: 3 },
-    { pv: 2000, label: "50%", index: 4 }
+    { pv: 0,    label: "25%", key: "25%" },
+    { pv: 500,  label: "35%", key: "35%" },
+    { pv: 1000, label: "42%", key: "42%" },
+    { pv: 2000, label: "50%", key: "50%" }
 ];
 
 // ==========================================
-// 2. BASE DE DADOS (ITENS E PREÇOS)
+// UTILITÁRIOS
 // ==========================================
-// itensComuns possui: sku, nome, pv, pvc (Preço Sugerido Consumidor)
-var itensComuns = [
-    {sku:'534K',nome:'Protein Ice Cream Chocolate',pv:59.8,pvc:473},
-    {sku:'535K',nome:'Protein Ice Cream Baunilha',pv:59.8,pvc:473},
-    {sku:'447K',nome:'Shake Pistache',pv:25.75,pvc:246},
-    {sku:'249K',nome:'Shake Frapê de Abacaxi',pv:25.75,pvc:246},
-    {sku:'295K',nome:'Shake Cookies & Cream',pv:25.75,pvc:246},
-    {sku:'023K',nome:'Shake Café Cremoso',pv:25.75,pvc:246},
-    {sku:'0940',nome:'Shake Doce de Leite',pv:25.75,pvc:246},
-    {sku:'3144',nome:'Shake Chocolate Sensation',pv:25.75,pvc:246},
-    {sku:'0951',nome:'Shake Baunilha Cremoso',pv:25.75,pvc:246},
-    {sku:'0953',nome:'Shake Morango Cremoso',pv:25.75,pvc:246},
-    {sku:'326K',nome:'Shake Banana Caramelizada',pv:25.75,pvc:246},
-    {sku:'439K',nome:'Shake Torta de Limão',pv:25.75,pvc:246},
-    {sku:'0930',nome:'Shake Coco',pv:25.75,pvc:246},
-    {sku:'2122',nome:'Shake Doce de Leite Econ.',pv:102,pvc:786},
-    {sku:'387K',nome:'Shake Choc. Sensation Econ.',pv:96.9,pvc:786},
-    {sku:'2129',nome:'Shake Baunilha Econ.',pv:102,pvc:786},
-    {sku:'1446',nome:'Shake Morango Econ.',pv:102,pvc:786},
-    {sku:'1445',nome:'CR7 Drive',pv:26.75,pvc:243},
-    {sku:'0948',nome:'Shake Sachê Baunilha',pv:9.55,pvc:87},
-    {sku:'0020',nome:'Xtra-Cal',pv:11,pvc:109},
-    {sku:'448K',nome:'Sopa Frango com Legumes',pv:9.35,pvc:87},
-    {sku:'445K',nome:'Sopa Creme de Cebola',pv:9.35,pvc:87},
-    {sku:'190K',nome:'Liftoff Amora Intenso',pv:20.2,pvc:196},
-    {sku:'371K',nome:'Liftoff Abacaxi',pv:20.2,pvc:196},
-    {sku:'317K',nome:'Liftoff Limão Siciliano',pv:20.2,pvc:196},
-    {sku:'060K',nome:'Herbal Concentrate 51g',pv:21.45,pvc:222},
-    {sku:'057K',nome:'N-R-G Original 100g',pv:24.45,pvc:252},
-    {sku:'0031',nome:'Barras Limão Citrus',pv:10.4,pvc:110},
-    {sku:'214K',nome:'Barras Vanilla Almond',pv:10.4,pvc:110},
-    {sku:'325K',nome:'Creatina Premium 150g',pv:18.45,pvc:181},
-    {sku:'318K',nome:'Shape Control',pv:35.35,pvc:338},
-    {sku:'1923',nome:'Beauty Booster',pv:27.8,pvc:301},
-    {sku:'395K',nome:'Nutri Soup Frango',pv:25.75,pvc:246},
-    {sku:'058K',nome:'N-R-G Original 60g',pv:15.85,pvc:159},
-    {sku:'056K',nome:'N-R-G Guaraná 100g',pv:24.45,pvc:252},
-    {sku:'0246',nome:'Pó de Proteína 480g',pv:39.25,pvc:401},
-    {sku:'062K',nome:'Herbal Conc. Laranja 102g',pv:37.6,pvc:364},
-    {sku:'306B',nome:'NutreV pack 10 unidades',pv:80.9,pvc:790},
-    {sku:'1639',nome:'NutreV',pv:7.4,pvc:79},
-    {sku:'497K',nome:'Fiber Conc. Immune',pv:20.3,pvc:206},
-    {sku:'040K',nome:'Protein Crunch',pv:12.3,pvc:112},
-    {sku:'146K',nome:'Glutamina',pv:9.1,pvc:80},
-    {sku:'0242',nome:'Pó de Proteína 240g',pv:19.3,pvc:221},
-    {sku:'004K',nome:'Herbal Conc. Original Econ.',pv:138.05,pvc:1072},
-    {sku:'063K',nome:'Herbal Concentrate Limão 51g',pv:21.45,pvc:222},
-    {sku:'0927',nome:'Fiber Powder',pv:24.65,pvc:243},
-    {sku:'191K',nome:'Whey Protein Baunilha',pv:24.55,pvc:256},
-    {sku:'061K',nome:'Herbal Concentrate Canela 102g',pv:37.6,pvc:364},
-    {sku:'003K',nome:'N-R-G Guaraná Econ.',pv:84.8,pvc:668},
-    {sku:'147K',nome:'Whey Protein 3W',pv:24.55,pvc:256},
-    {sku:'223K',nome:'OnActive Drink',pv:19.45,pvc:176},
-    {sku:'1417',nome:'H24 Tri-Core Protein',pv:46.8,pvc:467},
-    {sku:'0931',nome:'Nutri Soup Creme Verde',pv:25.75,pvc:246},
-    {sku:'148K',nome:'BCAA 5:1:1',pv:25.85,pvc:264},
-    {sku:'496K',nome:'Fiber Concentrate Uva',pv:20.3,pvc:206},
-    {sku:'498K',nome:'Fiber Concentrate Manga',pv:20.3,pvc:206},
-    {sku:'059K',nome:'Herbal Conc. Original 102g',pv:37.6,pvc:364},
-    {sku:'0065',nome:'Herbalifeline',pv:27.7,pvc:281},
-    {sku:'3122',nome:'Multivitaminas e Minerais',pv:10.75,pvc:122},
-    {sku:'0411',nome:'Sabonete Barra',pv:2.05,pvc:21},
-    {sku:'0431',nome:'Creme Hidratante',pv:8.2,pvc:82},
-    {sku:'0766',nome:'Cleanser Facial',pv:13.7,pvc:182},
-    {sku:'0770',nome:'Gel Firmador Olhos',pv:21.7,pvc:282},
-    {sku:'0773',nome:'Máscara Purificante Argila',pv:13.8,pvc:185},
-    {sku:'0768',nome:'Sérum Facial',pv:30.9,pvc:397},
-    {sku:'0408',nome:'Sabonete Líquido Mãos',pv:7.2,pvc:71},
-    {sku:'0563',nome:'Desodorante Soft Green',pv:2.7,pvc:30}
-];
 
-// precosPorEstado agora vem do arquivo externo precos.js carregado no HTML
+/** Converte string BR "357,73" para número 357.73 */
+function brToNum(str) {
+    if (!str) return 0;
+    if (typeof str === 'number') return str;
+    return parseFloat(String(str).replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+/** Formata número para moeda BR */
+function fmt(v) {
+    if (!v && v !== 0) return "R$ 0,00";
+    return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/** Extrai o SKU real do início do campo nome (ex: "534K Protein..." → "534K") */
+function extrairSKU(nome) {
+    if (!nome) return "";
+    const match = nome.match(/^(\d{3,4}[A-Z]?)\s/);
+    if (match) return match[1];
+    // Caso especial: nome que já é o SKU (ex: "Fiber Concentrate Manga" com sku "498K")
+    return "";
+}
 
 // ==========================================
-// 3. LÓGICA DE INICIALIZAÇÃO E EVENTOS
+// INICIALIZAÇÃO
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await carregarJSON();
     popularUFs();
     configurarEventos();
+    filtrarProdutosPorEstado();
     renderProdutos();
     atualizarCarrinho();
 });
 
+async function carregarJSON() {
+    try {
+        const resp = await fetch('tabelas_estados_herbalife.json');
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        dadosJSON = await resp.json();
+        console.log(`✅ JSON carregado: ${dadosJSON.length} registros`);
+
+        // DEBUG OBRIGATÓRIO: Validar GO + 534K
+        const goItems = dadosJSON.filter(i => i.estado === "GO");
+        const go534 = goItems.find(i => i.nome && i.nome.startsWith("534K"));
+        if (go534) {
+            console.log("🔍 VALIDAÇÃO GO + 534K:", {
+                "25%": go534["25%"],
+                "35%": go534["35%"],
+                "42%": go534["42%"],
+                "50%": go534["50%"]
+            });
+        }
+
+        // DEBUG OBRIGATÓRIO: Validar ES + 534K
+        const esItems = dadosJSON.filter(i => i.estado === "ES");
+        const es534 = esItems.find(i => i.nome && i.nome.startsWith("534K"));
+        if (es534) {
+            console.log("🔍 VALIDAÇÃO ES + 534K:", {
+                "25%": es534["25%"],
+                "35%": es534["35%"],
+                "42%": es534["42%"],
+                "50%": es534["50%"]
+            });
+        }
+
+    } catch (err) {
+        console.error("❌ Erro ao carregar JSON:", err);
+    }
+}
+
 function popularUFs() {
     const select = document.getElementById('ufSelector');
-    if (!select) return;
-    
-    // Lista de estados disponíveis na nova planilha
-    const estados = Object.keys(precosPorEstado || {}).sort();
-    
-    if (estados.length === 0) {
-        console.error("Erro: Base de preços não carregada.");
-        return;
-    }
+    if (!select || dadosJSON.length === 0) return;
+
+    // Extrair estados únicos do JSON
+    const estados = [...new Set(dadosJSON.map(i => i.estado))].sort();
 
     estados.forEach(uf => {
         const opt = document.createElement('option');
         opt.value = uf;
         opt.textContent = `Estado de Entrega: ${uf}`;
-        if(uf === "SP") opt.selected = true;
+        if (uf === ufAtual) opt.selected = true;
         select.appendChild(opt);
     });
+
+    // Se o estado padrão não existe no JSON, usar o primeiro
+    if (!estados.includes(ufAtual) && estados.length > 0) {
+        ufAtual = estados[0];
+        select.value = ufAtual;
+    }
+}
+
+function filtrarProdutosPorEstado() {
+    // Filtra do JSON apenas os produtos do estado selecionado
+    const todosDoEstado = dadosJSON.filter(i => i.estado === ufAtual);
+
+    // Deduplica por nome (o JSON pode ter duplicatas de abas diferentes)
+    // Usa o SKU real extraído do nome como chave
+    const mapa = new Map();
+    todosDoEstado.forEach(item => {
+        const skuReal = extrairSKU(item.nome) || item.sku;
+        const chave = skuReal + "_" + item.nome;
+        if (!mapa.has(chave)) {
+            mapa.set(chave, item);
+        }
+    });
+
+    produtosDoEstado = Array.from(mapa.values());
+    console.log(`📦 Estado ${ufAtual}: ${produtosDoEstado.length} produtos carregados`);
 }
 
 function configurarEventos() {
-    // UF Selector
     document.getElementById('ufSelector').addEventListener('change', (e) => {
         ufAtual = e.target.value;
+        filtrarProdutosPorEstado();
         renderProdutos();
         atualizarCarrinho();
     });
 
-    // Search Bar com Debounce
     let timeoutBusca;
     document.getElementById('searchInput').addEventListener('input', (e) => {
         clearTimeout(timeoutBusca);
@@ -137,14 +150,13 @@ function configurarEventos() {
         }, 300);
     });
 
-    // Cart Drawer Controls
     document.getElementById('cartFloatBtn').addEventListener('click', toggleCart);
     document.getElementById('closeCart').addEventListener('click', toggleCart);
     document.getElementById('cartOverlay').addEventListener('click', toggleCart);
     document.getElementById('addMoreProducts').addEventListener('click', toggleCart);
-    
+
     document.getElementById('limparCarrinho').addEventListener('click', () => {
-        if(confirm("Deseja limpar todo o seu pedido?")) {
+        if (confirm("Deseja limpar todo o seu pedido?")) {
             carrinho = [];
             atualizarCarrinho();
             renderProdutos();
@@ -160,7 +172,7 @@ function toggleCart() {
 }
 
 // ==========================================
-// 4. LÓGICA DE CÁLCULO E RENDERIZAÇÃO
+// LÓGICA DE FAIXA DE DESCONTO
 // ==========================================
 
 function getFaixaAtiva() {
@@ -172,74 +184,75 @@ function getFaixaAtiva() {
     return faixa;
 }
 
-/**
- * Retorna o preço exato da tabela via SKU
- * @param {string} sku - SKU do produto
- * @param {string} uf - UF atual
- * @param {number} idxFaixa - 0=Cons, 1=25%, 2=35%, 3=42%, 4=50%
- */
-function getPrecoTabela(sku, uf, idxFaixa) {
-    if (!precosPorEstado || !precosPorEstado[uf]) return 0;
-    const precosItem = precosPorEstado[uf][sku];
-    if (!precosItem) return 0;
-    return precosItem[idxFaixa] || 0;
-}
+// ==========================================
+// RENDERIZAÇÃO
+// ==========================================
 
 function renderProdutos() {
     const container = document.getElementById('listaProdutos');
     container.innerHTML = '';
-    
+
     const faixaAtiva = getFaixaAtiva();
 
-    itensComuns.forEach((item, index) => {
+    produtosDoEstado.forEach((item, index) => {
+        const skuReal = extrairSKU(item.nome) || item.sku;
+        const nomeDisplay = item.nome.replace(/^\d{3,4}[A-Z]?\s+/, '');
+
         // Filtro de busca
-        if (termoBusca && !item.nome.toLowerCase().includes(termoBusca) && !item.sku.toLowerCase().includes(termoBusca)) {
-            return;
+        if (termoBusca) {
+            const termo = termoBusca.toLowerCase();
+            if (!item.nome.toLowerCase().includes(termo) && !skuReal.toLowerCase().includes(termo)) {
+                return;
+            }
         }
+
+        // Ler preços EXATAMENTE do JSON, sem calcular nada
+        const pCons = brToNum(item["preço_consumidor"]);
+        const p25 = brToNum(item["25%"]);
+        const p35 = brToNum(item["35%"]);
+        const p42 = brToNum(item["42%"]);
+        const p50 = brToNum(item["50%"]);
+        const pv = brToNum(item.pv);
 
         const card = document.createElement('div');
         card.className = 'product-card';
-        
-        // Valores extraídos diretamente da tabela por SKU
-        const pCons = getPrecoTabela(item.sku, ufAtual, 0);
-        const p25 = getPrecoTabela(item.sku, ufAtual, 1);
-        const p35 = getPrecoTabela(item.sku, ufAtual, 2);
-        const p42 = getPrecoTabela(item.sku, ufAtual, 3);
-        const p50 = getPrecoTabela(item.sku, ufAtual, 4);
 
-        // Só mostra o card se houver preço para o estado (evita itens inexistentes na planilha da UF)
-        if (pCons === 0) return;
+        // Destacar a coluna ativa baseada na faixa de PV
+        const is25 = faixaAtiva.key === "25%" ? 'active' : '';
+        const is35 = faixaAtiva.key === "35%" ? 'active' : '';
+        const is42 = faixaAtiva.key === "42%" ? 'active' : '';
+        const is50 = faixaAtiva.key === "50%" ? 'active' : '';
 
         card.innerHTML = `
-            <span class="sku-tag">SKU: ${item.sku}</span>
-            <strong class="product-name">${item.nome}</strong>
-            <div class="product-pv">${item.pv.toFixed(2)} PV</div>
+            <span class="sku-tag">SKU: ${skuReal}</span>
+            <strong class="product-name">${nomeDisplay}</strong>
+            <div class="product-pv">${pv.toFixed(2)} PV</div>
             
             <div class="price-table">
                 <div class="price-col">
                     <span class="price-label">Cons.</span>
                     <span class="price-value">${fmt(pCons)}</span>
                 </div>
-                <div class="price-col ${faixaAtiva.index === 1 ? 'active' : ''}">
+                <div class="price-col ${is25}">
                     <span class="price-label">25%</span>
                     <span class="price-value">${fmt(p25)}</span>
                 </div>
-                <div class="price-col ${faixaAtiva.index === 2 ? 'active' : ''}">
+                <div class="price-col ${is35}">
                     <span class="price-label">35%</span>
                     <span class="price-value">${fmt(p35)}</span>
                 </div>
-                <div class="price-col ${faixaAtiva.index === 3 ? 'active' : ''}">
+                <div class="price-col ${is42}">
                     <span class="price-label">42%</span>
                     <span class="price-value">${fmt(p42)}</span>
                 </div>
-                <div class="price-col ${faixaAtiva.index === 4 ? 'active' : ''}">
+                <div class="price-col ${is50}">
                     <span class="price-label">50%</span>
                     <span class="price-value">${fmt(p50)}</span>
                 </div>
             </div>
 
             <div class="card-actions">
-                <input type="number" value="1" min="1" class="qty-input" id="qty-${item.sku}">
+                <input type="number" value="1" min="1" class="qty-input" id="qty-${index}">
                 <button class="add-btn" onclick="adicionarAoCarrinho(${index})">Adicionar</button>
             </div>
         `;
@@ -250,31 +263,35 @@ function renderProdutos() {
 }
 
 function adicionarAoCarrinho(idx) {
-    const itemOrig = itensComuns[idx];
-    const inputQty = document.getElementById(`qty-${itemOrig.sku}`);
+    const itemOrig = produtosDoEstado[idx];
+    const inputQty = document.getElementById(`qty-${idx}`);
     const qty = parseInt(inputQty.value) || 1;
-    
-    const indexExistente = carrinho.findIndex(c => c.sku === itemOrig.sku);
-    
+
+    const skuReal = extrairSKU(itemOrig.nome) || itemOrig.sku;
+    const pv = brToNum(itemOrig.pv);
+
+    const indexExistente = carrinho.findIndex(c => c.chave === (skuReal + "_" + itemOrig.nome));
+
     if (indexExistente > -1) {
         carrinho[indexExistente].qtd += qty;
     } else {
         carrinho.push({
-            sku: itemOrig.sku,
-            nome: itemOrig.nome,
-            pv: itemOrig.pv,
-            idxOriginal: idx,
+            chave: skuReal + "_" + itemOrig.nome,
+            sku: skuReal,
+            nome: itemOrig.nome.replace(/^\d{3,4}[A-Z]?\s+/, ''),
+            pv: pv,
+            itemJSON: itemOrig, // Referência ao item original do JSON
             qtd: qty
         });
     }
-    
-    inputQty.value = 1; 
+
+    inputQty.value = 1;
     atualizarCarrinho();
-    renderProdutos(); 
+    renderProdutos();
 }
 
-function removerDoCarrinho(sku) {
-    carrinho = carrinho.filter(i => i.sku !== sku);
+function removerDoCarrinho(chave) {
+    carrinho = carrinho.filter(i => i.chave !== chave);
     atualizarCarrinho();
     renderProdutos();
 }
@@ -282,17 +299,24 @@ function removerDoCarrinho(sku) {
 function atualizarCarrinho() {
     const container = document.getElementById('itensCarrinho');
     container.innerHTML = '';
-    
+
     let totalPV = 0;
     let totalReal = 0;
-    
+
     const faixa = getFaixaAtiva();
 
     carrinho.forEach(item => {
         const vPV = item.pv * item.qtd;
-        const valorUnitario = getPrecoTabela(item.sku, ufAtual, faixa.index);
+
+        // Buscar preço da faixa ativa direto do JSON original
+        // Precisamos re-buscar do estado atual caso tenha mudado
+        const itemNoEstadoAtual = dadosJSON.find(d => 
+            d.estado === ufAtual && d.nome === item.itemJSON.nome
+        ) || item.itemJSON;
+
+        const valorUnitario = brToNum(itemNoEstadoAtual[faixa.key]);
         const valorTotalItem = valorUnitario * item.qtd;
-        
+
         totalPV += vPV;
         totalReal += valorTotalItem;
 
@@ -304,16 +328,15 @@ function atualizarCarrinho() {
                 ${item.qtd} un x ${fmt(valorUnitario)} | <strong>${vPV.toFixed(2)} PV</strong>
             </div>
             <div style="font-weight: 800; color: var(--primary);">${fmt(valorTotalItem)}</div>
-            <button onclick="removerDoCarrinho('${item.sku}')" style="position:absolute; right: 10px; top: 15px; border:none; background:none; cursor:pointer; font-size: 1.1rem;">🗑️</button>
+            <button onclick="removerDoCarrinho('${item.chave}')" style="position:absolute; right: 10px; top: 15px; border:none; background:none; cursor:pointer; font-size: 1.1rem;">🗑️</button>
         `;
         container.appendChild(row);
     });
 
-    // Atualizar UI
     document.getElementById('cartBadge').textContent = carrinho.reduce((a, b) => a + b.qtd, 0);
     document.getElementById('pvAtual').textContent = totalPV.toFixed(2);
     document.getElementById('resumoPV').textContent = totalPV.toFixed(2);
-    document.getElementById('resumoSubtotal').textContent = fmt(totalReal); // Agora o subtotal é a soma direta da tabela
+    document.getElementById('resumoSubtotal').textContent = fmt(totalReal);
     document.getElementById('resumoDesconto').textContent = faixa.label;
     document.getElementById('resumoTotal').textContent = fmt(totalReal);
 }
@@ -322,20 +345,16 @@ function atualizarProgresso() {
     const totalPV = carrinho.reduce((acc, item) => acc + (item.pv * item.qtd), 0);
     let target = 500;
     let prox = "35%";
-    
+
     if (totalPV >= 500 && totalPV < 1000) { target = 1000; prox = "42%"; }
     else if (totalPV >= 1000 && totalPV < 2000) { target = 2000; prox = "50%"; }
     else if (totalPV >= 2000) { target = 2000; prox = "MAX"; }
 
     const perc = Math.min((totalPV / target) * 100, 100);
     document.getElementById('progressBar').style.width = perc + "%";
-    
-    const texto = totalPV >= 2000 
-        ? "Parabéns! Você atingiu o desconto máximo de 50%!" 
+
+    const texto = totalPV >= 2000
+        ? "Parabéns! Você atingiu o desconto máximo de 50%!"
         : `Faltam ${(target - totalPV).toFixed(2)} PV para atingir ${prox}`;
     document.getElementById('proximoNivel').textContent = texto;
-}
-
-function fmt(v) {
-    return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
