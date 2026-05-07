@@ -1,18 +1,18 @@
 // ==========================================
-// SIMULADOR DE PEDIDOS HERBALIFE - SUPABASE
-// Dados 100% da tabela "produtos" do Supabase
-// SEM cálculos, SEM impostos, SEM conversões
+// SIMULADOR DE PEDIDOS HERBALIFE - SUPABASE PRO
+// Fonte única: Tabela "produtos" no Supabase
 // ==========================================
 
 const SUPABASE_URL = 'https://jrbzvtbpzqjehakaqscz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_JyHOGdaA9cNU9H_l4DErSA_lmTiupe5';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Estado Global
 let ufAtual = "SP";
 let carrinho = [];
 let termoBusca = "";
-let todosProdutos = []; // Cache de todos os produtos do Supabase
-let produtosDoEstado = []; // Filtrado pelo estado selecionado
+let cacheEstados = {}; // { "GO": [...produtos], "ES": [...] }
+let estadosDisponiveis = [];
 
 const FAIXAS = [
     { pv: 0,    label: "25%", key: "preco_25" },
@@ -22,71 +22,94 @@ const FAIXAS = [
 ];
 
 // ==========================================
-// UTILITÁRIOS
-// ==========================================
-
-function fmt(v) {
-    if (!v && v !== 0) return "R$ 0,00";
-    return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-// ==========================================
 // INICIALIZAÇÃO
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await carregarDadosSupabase();
-    popularUFs();
+    await inicializarSistema();
     configurarEventos();
-    filtrarProdutosPorEstado();
-    renderProdutos();
-    atualizarCarrinho();
 });
 
-async function carregarDadosSupabase() {
+async function inicializarSistema() {
     try {
-        console.log("🚀 Buscando produtos no Supabase...");
+        mostrarLoading(true);
+        
+        // 1. Buscar lista de estados únicos primeiro para o seletor
+        const { data: ufs, error: errUfs } = await supabase
+            .from('produtos')
+            .select('estado');
+        
+        if (errUfs) throw errUfs;
+        estadosDisponiveis = [...new Set(ufs.map(i => i.estado))].sort();
+        popularUFs();
+
+        // 2. Carregar estado inicial
+        await carregarProdutosPorEstado(ufAtual);
+        
+        atualizarCarrinho();
+    } catch (err) {
+        exibirErro("Falha ao inicializar: " + err.message);
+    } finally {
+        mostrarLoading(false);
+    }
+}
+
+async function carregarProdutosPorEstado(uf) {
+    // Se já estiver no cache, não busca de novo
+    if (cacheEstados[uf]) {
+        console.log(`⚡ Usando cache para o estado: ${uf}`);
+        renderProdutos();
+        return;
+    }
+
+    try {
+        mostrarLoading(true);
+        console.log(`🌐 Buscando dados no Supabase para: ${uf}...`);
+        
         const { data, error } = await supabase
             .from('produtos')
-            .select('*');
+            .select('*')
+            .eq('estado', uf);
 
         if (error) throw error;
 
-        todosProdutos = data;
-        console.log(`✅ ${todosProdutos.length} registros carregados do Supabase.`);
+        cacheEstados[uf] = data;
+        console.log(`✅ Dados carregados para ${uf}:`, data);
 
-        // DEBUG/VALIDAÇÃO OBRIGATÓRIA: GO + SKU 534K
-        validarPrecos("GO", "534K");
-        validarPrecos("ES", "534K");
+        // Validação Obrigatória conforme solicitado
+        validarEstadoEspecifico(uf, data);
 
+        renderProdutos();
     } catch (err) {
-        console.error("❌ Erro Supabase:", err.message);
-        alert("Erro ao conectar com o banco de dados. Verifique sua conexão.");
+        exibirErro(`Erro ao carregar produtos de ${uf}: ` + err.message);
+    } finally {
+        mostrarLoading(false);
     }
 }
 
-function validarPrecos(uf, sku) {
-    const item = todosProdutos.find(i => i.estado === uf && i.sku === sku);
-    if (item) {
-        console.log(`🔍 VALIDAÇÃO ${uf} + SKU ${sku}:`, {
-            "25%": item.preco_25,
-            "35%": item.preco_35,
-            "42%": item.preco_42,
-            "50%": item.preco_50
+function validarEstadoEspecifico(uf, produtos) {
+    const item534 = produtos.find(p => p.sku === "534K");
+    if (item534) {
+        console.log(`📊 VALIDAÇÃO ${uf} + SKU 534K:`, {
+            "Consumidor": item534.preco_consumidor,
+            "25%": item534.preco_25,
+            "35%": item534.preco_35,
+            "42%": item534.preco_42,
+            "50%": item534.preco_50
         });
-    } else {
-        console.warn(`⚠️ Item ${sku} não encontrado para o estado ${uf} para validação.`);
     }
 }
+
+// ==========================================
+// EVENTOS E UI
+// ==========================================
 
 function popularUFs() {
     const select = document.getElementById('ufSelector');
-    if (!select || todosProdutos.length === 0) return;
-
-    const estados = [...new Set(todosProdutos.map(i => i.estado))].sort();
-
-    select.innerHTML = ''; // Limpa antes de popular
-    estados.forEach(uf => {
+    if (!select) return;
+    
+    select.innerHTML = '';
+    estadosDisponiveis.forEach(uf => {
         const opt = document.createElement('option');
         opt.value = uf;
         opt.textContent = `Estado de Entrega: ${uf}`;
@@ -95,17 +118,11 @@ function popularUFs() {
     });
 }
 
-function filtrarProdutosPorEstado() {
-    produtosDoEstado = todosProdutos.filter(i => i.estado === ufAtual);
-    console.log(`📦 Estado ${ufAtual}: ${produtosDoEstado.length} produtos carregados.`);
-}
-
 function configurarEventos() {
-    document.getElementById('ufSelector').addEventListener('change', (e) => {
+    document.getElementById('ufSelector').addEventListener('change', async (e) => {
         ufAtual = e.target.value;
-        filtrarProdutosPorEstado();
-        renderProdutos();
-        atualizarCarrinho();
+        await carregarProdutosPorEstado(ufAtual);
+        atualizarCarrinho(); // Recalcula preços do carrinho para o novo estado
     });
 
     let timeoutBusca;
@@ -121,14 +138,37 @@ function configurarEventos() {
     document.getElementById('closeCart').addEventListener('click', toggleCart);
     document.getElementById('cartOverlay').addEventListener('click', toggleCart);
     document.getElementById('addMoreProducts').addEventListener('click', toggleCart);
-
+    
     document.getElementById('limparCarrinho').addEventListener('click', () => {
-        if (confirm("Deseja limpar todo o seu pedido?")) {
+        if(confirm("Deseja limpar todo o seu pedido?")) {
             carrinho = [];
             atualizarCarrinho();
             renderProdutos();
         }
     });
+}
+
+function mostrarLoading(show) {
+    const container = document.getElementById('listaProdutos');
+    if (show) {
+        container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 1rem;">Buscando preços oficiais no banco...</p>
+            </div>
+        `;
+    }
+}
+
+function exibirErro(msg) {
+    const container = document.getElementById('listaProdutos');
+    container.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem; background: #fff1f1; border: 1px solid #ffa3a3; border-radius: 12px; color: #d32f2f;">
+            <p>⚠️ ${msg}</p>
+            <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">Tentar Novamente</button>
+        </div>
+    `;
+    console.error(msg);
 }
 
 function toggleCart() {
@@ -137,6 +177,10 @@ function toggleCart() {
     drawer.classList.toggle('active');
     overlay.style.display = drawer.classList.contains('active') ? 'block' : 'none';
 }
+
+// ==========================================
+// RENDERIZAÇÃO
+// ==========================================
 
 function getFaixaAtiva() {
     const totalPV = carrinho.reduce((acc, item) => acc + (item.pv * item.qtd), 0);
@@ -147,27 +191,25 @@ function getFaixaAtiva() {
     return faixa;
 }
 
-// ==========================================
-// RENDERIZAÇÃO
-// ==========================================
-
 function renderProdutos() {
     const container = document.getElementById('listaProdutos');
-    container.innerHTML = '';
+    const produtos = cacheEstados[ufAtual] || [];
+    
+    if (produtos.length === 0 && !termoBusca) return;
 
+    container.innerHTML = '';
     const faixaAtiva = getFaixaAtiva();
 
-    produtosDoEstado.forEach((item, index) => {
+    produtos.forEach((item) => {
         if (termoBusca) {
-            const termo = termoBusca.toLowerCase();
-            if (!item.nome.toLowerCase().includes(termo) && !item.sku.toLowerCase().includes(termo)) {
+            if (!item.nome.toLowerCase().includes(termoBusca) && !item.sku.toLowerCase().includes(termoBusca)) {
                 return;
             }
         }
 
         const card = document.createElement('div');
         card.className = 'product-card';
-
+        
         const is25 = faixaAtiva.key === "preco_25" ? 'active' : '';
         const is35 = faixaAtiva.key === "preco_35" ? 'active' : '';
         const is42 = faixaAtiva.key === "preco_42" ? 'active' : '';
@@ -208,38 +250,35 @@ function renderProdutos() {
         `;
         container.appendChild(card);
     });
-
-    atualizarProgresso();
 }
 
-// Global para o onclick
-window.adicionarAoCarrinho = function(itemId) {
-    const itemOrig = todosProdutos.find(p => p.id === itemId);
-    const inputQty = document.getElementById(`qty-${itemId}`);
+window.adicionarAoCarrinho = function(id) {
+    const produtos = cacheEstados[ufAtual];
+    const itemBanco = produtos.find(p => p.id === id);
+    const inputQty = document.getElementById(`qty-${id}`);
     const qty = parseInt(inputQty.value) || 1;
 
-    const indexExistente = carrinho.findIndex(c => c.id === itemId);
-
+    const indexExistente = carrinho.findIndex(c => c.sku === itemBanco.sku);
+    
     if (indexExistente > -1) {
         carrinho[indexExistente].qtd += qty;
     } else {
         carrinho.push({
-            id: itemId,
-            sku: itemOrig.sku,
-            nome: itemOrig.nome,
-            pv: Number(itemOrig.pv),
-            itemBanco: itemOrig,
+            id: id,
+            sku: itemBanco.sku,
+            nome: itemBanco.nome,
+            pv: Number(itemBanco.pv),
             qtd: qty
         });
     }
-
-    inputQty.value = 1;
+    
+    inputQty.value = 1; 
     atualizarCarrinho();
     renderProdutos();
 };
 
-window.removerDoCarrinho = function(itemId) {
-    carrinho = carrinho.filter(i => i.id !== itemId);
+window.removerDoCarrinho = function(id) {
+    carrinho = carrinho.filter(i => i.id !== id);
     atualizarCarrinho();
     renderProdutos();
 };
@@ -247,20 +286,21 @@ window.removerDoCarrinho = function(itemId) {
 function atualizarCarrinho() {
     const container = document.getElementById('itensCarrinho');
     container.innerHTML = '';
-
+    
     let totalPV = 0;
     let totalReal = 0;
-
     const faixa = getFaixaAtiva();
 
     carrinho.forEach(item => {
         const vPV = item.pv * item.qtd;
         
-        // Sempre busca o preço do estado atual
-        const itemNoEstado = todosProdutos.find(p => p.estado === ufAtual && p.sku === item.sku) || item.itemBanco;
-        const valorUnitario = itemNoEstado[faixa.key];
+        // Sempre busca o preço do produto para o estado selecionado no momento
+        const produtosEstado = cacheEstados[ufAtual] || [];
+        const itemEstado = produtosEstado.find(p => p.sku === item.sku);
+        
+        const valorUnitario = itemEstado ? itemEstado[faixa.key] : 0;
         const valorTotalItem = valorUnitario * item.qtd;
-
+        
         totalPV += vPV;
         totalReal += valorTotalItem;
 
@@ -289,16 +329,21 @@ function atualizarProgresso() {
     const totalPV = carrinho.reduce((acc, item) => acc + (item.pv * item.qtd), 0);
     let target = 500;
     let prox = "35%";
-
+    
     if (totalPV >= 500 && totalPV < 1000) { target = 1000; prox = "42%"; }
     else if (totalPV >= 1000 && totalPV < 2000) { target = 2000; prox = "50%"; }
     else if (totalPV >= 2000) { target = 2000; prox = "MAX"; }
 
     const perc = Math.min((totalPV / target) * 100, 100);
     document.getElementById('progressBar').style.width = perc + "%";
-
-    const texto = totalPV >= 2000
-        ? "Parabéns! Você atingiu o desconto máximo de 50%!"
+    
+    const texto = totalPV >= 2000 
+        ? "Parabéns! Você atingiu o desconto máximo de 50%!" 
         : `Faltam ${(target - totalPV).toFixed(2)} PV para atingir ${prox}`;
     document.getElementById('proximoNivel').textContent = texto;
+}
+
+function fmt(v) {
+    if (!v && v !== 0) return "R$ 0,00";
+    return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
