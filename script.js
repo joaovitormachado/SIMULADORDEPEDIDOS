@@ -25,27 +25,26 @@ const FAIXAS = [
 // INICIALIZAÇÃO
 // ==========================================
 
+// Lista fixa de estados para evitar query pesada no Supabase
+const ESTADOS_BR = [
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 
+    'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+];
+
 document.addEventListener('DOMContentLoaded', async () => {
+    estadosDisponiveis = ESTADOS_BR;
+    popularUFs();
+    // 1. Garante que ufAtual existe, se não, pega o primeiro
+    if (!estadosDisponiveis.includes(ufAtual)) ufAtual = estadosDisponiveis[0];
+    
     await inicializarSistema();
     configurarEventos();
 });
 
 async function inicializarSistema() {
     try {
-        mostrarLoading(true);
-        
-        // 1. Buscar lista de estados únicos primeiro para o seletor
-        const { data: ufs, error: errUfs } = await supabase
-            .from('produtos')
-            .select('estado');
-        
-        if (errUfs) throw errUfs;
-        estadosDisponiveis = [...new Set(ufs.map(i => i.estado))].sort();
-        popularUFs();
-
-        // 2. Carregar estado inicial
+        // Carregar estado inicial
         await carregarProdutosPorEstado(ufAtual);
-        
         atualizarCarrinho();
     } catch (err) {
         exibirErro("Falha ao inicializar: " + err.message);
