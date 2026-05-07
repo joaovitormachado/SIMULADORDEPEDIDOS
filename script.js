@@ -36,9 +36,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!window.supabase) throw new Error("SDK do Supabase não carregou. Verifique sua conexão ou desative bloqueadores de anúncio.");
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     } catch(err) {
-        alert(err.message);
+        alert("Erro fatal no carregamento: " + err.message);
         return;
     }
+
+    // TESTE DIAGNÓSTICO SOLICITADO
+    console.log('--- SUPABASE DIAGNOSTIC TEST INICIADO ---');
+    try {
+        const { data, error } = await supabase
+            .from('produtos')
+            .select('*')
+            .limit(5);
+
+        console.log('SUPABASE DATA:', data);
+        console.log('SUPABASE ERROR:', error);
+    } catch (e) {
+        console.error('SUPABASE CATCH EXCEPTION:', e);
+    }
+    console.log('-----------------------------------------');
 
     estadosDisponiveis = ESTADOS_BR;
     popularUFs();
@@ -78,16 +93,19 @@ async function carregarProdutosPorEstado(uf) {
             .select('*')
             .eq('estado', uf);
 
+        console.log("RAW SUPABASE RESPOSTA PARA " + uf + ":", { data, error });
+
         if (error) throw error;
 
-        cacheEstados[uf] = data;
-        console.log(`✅ Dados carregados para ${uf}:`, data);
+        cacheEstados[uf] = data || [];
+        console.log(`✅ Dados carregados para ${uf}:`, cacheEstados[uf]);
 
         // Validação Obrigatória conforme solicitado
-        validarEstadoEspecifico(uf, data);
+        validarEstadoEspecifico(uf, cacheEstados[uf]);
 
         renderProdutos();
     } catch (err) {
+        console.error("ERRO SUPABASE DETALHADO:", err);
         exibirErro(`Erro ao carregar produtos de ${uf}: ` + err.message);
     } finally {
         mostrarLoading(false);
