@@ -1,269 +1,21 @@
-var DIST_NOME = '', DIST_ID = '', carrinho = {};
-var FAIXAS = [
-    { label: '25%', min: 0, target: 500 },
-    { label: '35%', min: 500, target: 1000 },
-    { label: '42%', min: 1000, target: 2000 },
-    { label: '50%', min: 2000, target: null }
+// ==========================================
+// 1. VARIÁVEIS GLOBAIS E ESTADO
+// ==========================================
+let ufAtual = "SP";
+let ipiAtual = 0.05;
+let icmsAtual = 0.09;
+let carrinho = [];
+
+const FAIXAS = [
+    { pv: 0, desconto: 0.25, label: "25%", fator: 1.00 },
+    { pv: 500, desconto: 0.35, label: "35%", fator: 0.86 },
+    { pv: 1000, desconto: 0.42, label: "42%", fator: 0.77 },
+    { pv: 4000, desconto: 0.50, label: "50%", fator: 0.67 }
 ];
 
-var PRODUTOS = {};
-
-// === FUNÇÕES DE LÓGICA CORE ===
-
-function entrar() {
-    var n = document.getElementById('inp-name').value.trim();
-    if (!n) { alert('Por favor, informe seu nome.'); return; }
-    DIST_NOME = n;
-    DIST_ID = document.getElementById('inp-id').value.trim();
-    document.getElementById('header-distribuidor').textContent = DIST_NOME + (DIST_ID ? ' — ID: ' + DIST_ID : '');
-    document.getElementById('welcome-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-}
-
-function getFaixaIdx(pvTotal) {
-    for (var i = FAIXAS.length - 1; i >= 0; i--) {
-        if (pvTotal >= FAIXAS[i].min) return i;
-    }
-    return 0;
-}
-
-function getTotal() {
-    var t = 0;
-    Object.keys(carrinho).forEach(function (k) {
-        var it = carrinho[k];
-        t += it.preco * it.qty;
-    });
-    return t;
-}
-
-function getTotalPV() {
-    var t = 0;
-    Object.keys(carrinho).forEach(function (k) {
-        var it = carrinho[k];
-        t += (it.pvPerUnit || 0) * it.qty;
-    });
-    return t;
-}
-
-function onEstado() {
-    var sel = document.getElementById('sel-estado');
-    var busca = document.getElementById('inp-busca');
-    var badge = document.getElementById('uf-badge');
-    if (sel.value) {
-        busca.disabled = false;
-        carrinho = {};
-        badge.textContent = '🏠 CD · ' + sel.selectedOptions[0].text;
-        renderCarrinho();
-    } else {
-        busca.disabled = true;
-        badge.textContent = '🏠 CD · Selecione o Estado';
-    }
-    renderProdutos();
-}
-
-function renderProdutos() {
-    var estado = document.getElementById('sel-estado').value;
-    var area = document.getElementById('produtos-area');
-    if (!estado) {
-        area.innerHTML = '<div class="empty-state"><div class="empty-icon">📍</div><p><strong>Selecione o estado de entrega</strong></p></div>';
-        return;
-    }
-
-    var lista = PRODUTOS[estado] || [];
-    var busca = document.getElementById('inp-busca').value.toLowerCase().trim();
-    if (busca) {
-        lista = lista.filter(function (p) {
-            return p.nome.toLowerCase().includes(busca) || p.sku.toLowerCase().includes(busca);
-        });
-    }
-
-    if (!lista.length) {
-        area.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><p>Nenhum produto encontrado.</p></div>';
-        return;
-    }
-
-    var totalPV = getTotalPV();
-    var fi = getFaixaIdx(totalPV);
-    var html = '<div class="products-grid">';
-
-    lista.forEach(function (p) {
-        var inCart = carrinho[p.sku] ? carrinho[p.sku].qty : 0;
-        var hasPvc = p.pvc != null;
-        
-        html += '<div class="product-card">';
-        html +=   '<div class="product-header">';
-        html +=     '<div>';
-        html +=       '<div class="product-name">' + p.nome + '</div>';
-        html +=       '<div class="product-sku">SKU: ' + p.sku + '</div>';
-        if (p.pv != null) {
-            html +=   '<div class="pv-tag">PV: ' + p.pv.toFixed(2).replace('.', ',') + ' pts</div>';
-        }
-        html +=     '</div>';
-        html +=   '</div>';
-        
-        html +=   '<div class="price-bands' + (hasPvc ? ' has-pvc' : '') + '">';
-        
-        if (hasPvc) {
-            html += '<div class="price-band pvc">';
-            html +=   '<div class="price-band-label">P. Consumidor</div>';
-            html +=   '<div class="price-band-value">R$ ' + p.pvc.toFixed(2).replace('.', ',') + '</div>';
-            html += '</div>';
-        }
-
-        FAIXAS.forEach(function (f, i) {
-            html += '<div class="price-band' + (i === fi ? ' active' : '') + '">';
-            html +=   '<div class="price-band-label">' + f.label + '</div>';
-            html +=   '<div class="price-band-value">R$ ' + p.p[i].toFixed(2).replace('.', ',') + '</div>';
-            html += '</div>';
-        });
-        
-        html +=   '</div>';
-        
-        html +=   '<div class="cart-row">';
-        html +=     '<div class="qty-control">';
-        html +=       '<button class="qty-btn" onclick="addQty(\'' + p.sku + '\',' + fi + ',-1)">−</button>';
-        html +=       '<input class="qty-input" type="number" min="0" value="' + inCart + '" onchange="setQty(\'' + p.sku + '\',' + fi + ',this.value)">';
-        html +=       '<button class="qty-btn" onclick="addQty(\'' + p.sku + '\',' + fi + ',1)">+</button>';
-        html +=     '</div>';
-        html +=     '<span style="font-size:.78rem;color:#6b7280;margin-left:6px">× R$ ' + p.p[fi].toFixed(2).replace('.', ',') + '</span>';
-        html +=   '</div>';
-        html += '</div>';
-    });
-
-    html += '</div>';
-    area.innerHTML = html;
-}
-
-function addQty(sku, fi, delta) {
-    var cur = carrinho[sku] ? carrinho[sku].qty : 0;
-    setQty(sku, fi, cur + delta);
-}
-
-function setQty(sku, fi, val) {
-    var v = parseInt(val) || 0;
-    if (v < 0) v = 0;
-    
-    var estado = document.getElementById('sel-estado').value;
-    var prod = PRODUTOS[estado].find(function(x){return x.sku===sku});
-    if(!prod) return;
-
-    if (v === 0) {
-        delete carrinho[sku];
-    } else {
-        carrinho[sku] = { 
-            nome: prod.nome, 
-            sku: sku, 
-            qty: v, 
-            pvPerUnit: prod.pv || 0,
-            pricesByFaixa: prod.p 
-        };
-    }
-
-    var currentTotalPV = getTotalPV();
-    var newFaixaIdx = getFaixaIdx(currentTotalPV);
-
-    Object.keys(carrinho).forEach(function(k) {
-        var it = carrinho[k];
-        it.preco = it.pricesByFaixa[newFaixaIdx];
-    });
-
-    renderCarrinho();
-    renderProdutos();
-}
-
-function renderCarrinho() {
-    var keys = Object.keys(carrinho);
-    var sec = document.getElementById('cart-section');
-    var tbody = document.getElementById('cart-tbody');
-    var pvTop = document.getElementById('pv-summary-top');
-    
-    var total = getTotal();
-    var totalPV = getTotalPV();
-    var fi = getFaixaIdx(totalPV);
-
-    if (!keys.length) {
-        sec.classList.remove('visible');
-        pvTop.style.display = 'none';
-        tbody.innerHTML = '';
-        return;
-    }
-
-    sec.classList.add('visible');
-    pvTop.style.display = 'block';
-
-    var currentFaixa = FAIXAS[fi];
-    var nextFaixa = FAIXAS[fi + 1];
-    
-    document.getElementById('pv-total-display').textContent = totalPV.toFixed(2) + ' PV';
-    document.getElementById('discount-badge').textContent = 'Desconto: ' + currentFaixa.label;
-    
-    var progress = 0;
-    if (nextFaixa) {
-        document.getElementById('next-tier-container').style.display = 'block';
-        document.getElementById('next-tier-label').textContent = nextFaixa.label;
-        document.getElementById('next-tier-goal').textContent = nextFaixa.min + ' PV';
-        var missing = nextFaixa.min - totalPV;
-        document.getElementById('pv-missing-display').textContent = 'Faltam ' + missing.toFixed(2) + ' PV';
-        
-        var range = nextFaixa.min - currentFaixa.min;
-        var currentInRange = totalPV - currentFaixa.min;
-        progress = (currentInRange / range) * 100;
-        if (progress > 100) progress = 100;
-        if (progress < 0) progress = 0;
-    } else {
-        document.getElementById('next-tier-container').style.display = 'none';
-        progress = 100;
-    }
-    document.getElementById('pv-progress-bar').style.width = progress + '%';
-
-    var rows = '';
-    keys.forEach(function (k) {
-        var it = carrinho[k];
-        rows += '<tr><td>' + it.nome + '</td><td>' + it.sku + '</td><td>' + it.qty + '</td><td>R$ ' + it.preco.toFixed(2).replace('.', ',') + '</td><td>R$ ' + (it.preco * it.qty).toFixed(2).replace('.', ',') + '</td></tr>';
-    });
-    tbody.innerHTML = rows;
-    document.getElementById('cart-total-val').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-    document.getElementById('faixa-label').textContent = 'Subtotal do Pedido (com ' + currentFaixa.label + ' de desconto)';
-}
-
-function limparCarrinho() {
-    carrinho = {};
-    renderCarrinho();
-    renderProdutos();
-}
-
-function fmt(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
-
-function gerarPDF() {
-    var keys = Object.keys(carrinho);
-    if (!keys.length) { alert('O carrinho está vazio.'); return; }
-    var total = getTotal();
-    var totalPV = getTotalPV();
-    var fi = getFaixaIdx(totalPV);
-    var nomeEstado = document.getElementById('sel-estado').selectedOptions[0].text;
-    var linhas = keys.map(function (k) {
-        var it = carrinho[k];
-        return '<tr><td>' + it.nome + '</td><td>' + it.sku + '</td><td>' + it.qty + '</td><td>' + fmt(it.preco) + '</td><td>' + fmt(it.preco * it.qty) + '</td></tr>';
-    }).join('');
-
-    var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pedido</title><style>body{font-family:Arial,sans-serif;padding:24px;font-size:13px}h2{color:#00a651}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{padding:8px;border:1px solid #ddd;text-align:left}th{background:#f0fdf4;color:#166534}.total{font-weight:700;font-size:1.1rem;margin-top:16px}.footer{margin-top:32px;font-size:11px;color:#888}</style></head><body>' +
-        '<h2>Simulador de Pedidos Herbalife</h2>' +
-        '<p><strong>Distribuidor:</strong> ' + DIST_NOME + (DIST_ID ? ' &nbsp;|&nbsp; <strong>ID:</strong> ' + DIST_ID : '') + '</p>' +
-        '<p><strong>Estado de Entrega:</strong> ' + nomeEstado + ' &nbsp;|&nbsp; <strong>Faixa:</strong> ' + FAIXAS[fi].label + ' &nbsp;|&nbsp; <strong>Volume:</strong> ' + totalPV.toFixed(2) + ' PV</p>' +
-        '<p><strong>Data:</strong> ' + new Date().toLocaleDateString('pt-BR') + '</p>' +
-        '<table><thead><tr><th>Produto</th><th>SKU</th><th>Qtd</th><th>Preço Unit.</th><th>Total</th></tr></thead><tbody>' + linhas + '</tbody></table>' +
-        '<p class="total">Total do Pedido: ' + fmt(total) + '</p>' +
-        '<p class="footer">Este simulador é uma ferramenta de apoio. Confirme sempre os valores em myherbalife.com</p>' +
-        '</body></html>';
-
-    var w = window.open('', '_blank');
-    w.document.write(html);
-    w.document.close();
-    setTimeout(function() { w.print(); }, 500);
-}
-
-// === DADOS DE PRODUTOS (UNIFICADOS) ===
-
+// ==========================================
+// 2. BASE DE DADOS (ITENS E PREÇOS)
+// ==========================================
 var itensComuns = [
     {sku:'534K',nome:'Protein Ice Cream Chocolate',pv:59.8,pvc:473},
     {sku:'535K',nome:'Protein Ice Cream Baunilha',pv:59.8,pvc:473},
@@ -361,29 +113,249 @@ var precosPorEstado = {
     SC: [342.65,310.62,288.20,262.58,342.65,310.62,288.20,262.58,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,583.89,529.32,491.12,447.46,554.88,503.02,466.72,425.23,583.89,529.32,491.12,447.46,583.89,529.32,491.12,447.46,183.75,169.21,159.04,147.41,61.45,56.42,52.90,48.88,75.61,68.54,63.60,57.94,61.14,56.82,53.79,50.33,61.14,56.82,53.79,50.33,140.15,128.84,120.92,111.87,140.15,128.84,120.92,111.87,140.15,128.84,120.92,111.87,154.06,139.66,129.58,118.06,168.59,152.83,141.80,129.19,85.78,81.03,77.71,73.91,85.78,81.03,77.71,73.91,131.01,120.21,112.65,104.01,241.19,218.64,202.86,184.83,214.52,194.47,180.44,164.40,172.04,155.96,144.71,131.84,111.79,101.34,94.03,85.67,168.59,152.83,141.80,129.19,282.66,256.24,237.75,216.61,255.21,231.36,214.66,195.58,501.18,477.84,461.50,442.83,62.06,58.93,56.74,54.24,135.48,122.82,113.95,103.82,81.32,73.72,68.40,62.32,57.50,53.29,50.34,46.97,152.86,138.58,128.58,117.15,796.96,722.47,670.33,610.74,154.06,139.66,129.58,118.06,172.69,156.55,145.25,132.34,180.98,168.16,159.19,148.94,255.21,231.36,214.66,195.58,496.15,449.78,417.32,380.22,180.98,168.16,159.19,148.94,126.89,116.66,109.49,101.31,352.59,323.34,302.87,279.48,172.04,155.96,144.71,131.84,187.20,173.65,164.16,153.32,135.48,122.82,113.95,103.82,135.48,122.82,113.95,103.82,255.21,231.36,214.66,195.58,195.70,177.41,164.61,149.97,82.53,74.81,69.41,63.24,11.24,10.47,9.94,9.32,51.23,47.95,45.65,43.03,103.47,95.87,90.54,84.45,159.96,147.83,139.34,129.64,105.48,97.68,92.22,85.99,225.45,208.43,196.52,182.90,47.88,44.48,42.11,39.39,17.97,16.82,16.02,15.10],
     SE: [361.35,329.32,306.90,281.28,361.35,329.32,306.90,281.28,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,181.45,165.37,154.11,141.25,615.65,561.08,522.88,479.23,585.06,533.20,496.90,455.41,615.65,561.08,522.88,479.23,615.65,561.08,522.88,479.23,193.30,178.60,168.32,156.53,64.79,59.77,56.24,52.23,80.97,73.91,68.96,63.31,65.48,61.16,58.13,54.67,65.48,61.16,58.13,54.67,147.80,136.49,128.58,119.53,147.80,136.49,128.58,119.53,147.80,136.49,128.58,119.53,162.89,148.49,138.41,126.90,178.25,162.49,151.46,138.86,91.86,87.11,83.79,80.00,91.86,87.11,83.79,80.00,138.52,127.72,120.16,111.52,258.30,235.76,219.98,201.95,229.74,209.70,195.66,179.62,181.45,165.37,154.11,141.25,118.20,107.75,100.44,92.08,178.25,162.49,151.46,138.86,298.87,272.45,253.95,232.82,269.84,245.99,229.29,210.21,536.75,513.41,497.07,478.39,66.46,63.34,61.15,58.65,145.09,132.43,123.57,113.44,87.09,79.49,74.17,68.09,60.79,56.58,53.64,50.27,161.63,147.34,137.34,125.91,842.64,768.15,716.01,656.42,162.89,148.49,138.41,126.90,184.95,168.81,157.51,144.60,191.35,178.53,169.56,159.31,269.84,245.99,229.29,210.21,524.60,478.22,445.76,408.67,191.35,178.53,169.56,159.31,135.89,125.66,118.50,110.31,377.58,348.34,327.87,304.47,181.45,165.37,154.11,141.25,200.49,186.94,177.45,166.61,145.09,132.43,123.57,113.44,145.09,132.43,123.57,113.44,269.84,245.99,229.29,210.21,209.59,191.30,178.49,163.86,88.38,80.67,75.27,69.10,11.46,10.69,10.15,9.53,52.63,49.35,47.05,44.43,106.30,98.69,93.36,87.27,164.33,152.20,143.71,134.00,108.35,100.56,95.10,88.87,231.60,214.58,202.67,189.05,50.63,47.23,44.85,42.14,18.46,17.31,16.51,15.59],
     SP: [342.65,310.62,288.20,262.58,342.65,310.62,288.20,262.58,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,172.04,155.96,144.71,131.84,583.89,529.32,491.12,447.46,554.88,503.02,466.72,425.23,583.89,529.32,491.12,447.46,583.89,529.32,491.12,447.46,183.75,169.21,159.04,147.41,61.45,56.42,52.90,48.88,75.61,68.54,63.60,57.94,61.14,56.82,53.79,50.33,61.14,56.82,53.79,50.33,140.15,128.84,120.92,111.87,140.15,128.84,120.92,111.87,140.15,128.84,120.92,111.87,154.06,139.66,129.58,118.06,168.59,152.83,141.80,129.19,85.78,81.03,77.71,73.91,85.78,81.03,77.71,73.91,131.01,120.21,112.65,104.01,241.19,218.64,202.86,184.83,214.52,194.47,180.44,164.40,172.04,155.96,144.71,131.84,111.79,101.34,94.03,85.67,168.59,152.83,141.80,129.19,282.66,256.24,237.75,216.61,255.21,231.36,214.66,195.58,501.18,477.84,461.50,442.83,62.06,58.93,56.74,54.24,135.48,122.82,113.95,103.82,81.32,73.72,68.40,62.32,57.50,53.29,50.34,46.97,152.86,138.58,128.58,117.15,796.96,722.47,670.33,610.74,154.06,139.66,129.58,118.06,172.69,156.55,145.25,132.34,180.98,168.16,159.19,148.94,255.21,231.36,214.66,195.58,496.15,449.78,417.32,380.22,180.98,168.16,159.19,148.94,126.89,116.66,109.49,101.31,352.59,323.34,302.87,279.48,172.04,155.96,144.71,131.84,187.20,173.65,164.16,153.32,135.48,122.82,113.95,103.82,135.48,122.82,113.95,103.82,255.21,231.36,214.66,195.58,195.70,177.41,164.61,149.97,82.53,74.81,69.41,63.24,11.24,10.47,9.94,9.32,51.23,47.95,45.65,43.03,103.47,95.87,90.54,84.45,159.96,147.83,139.34,129.64,105.48,97.68,92.22,85.99,225.45,208.43,196.52,182.90,47.88,44.48,42.11,39.39,17.97,16.82,16.02,15.10],
-    TO: [384.46,341.17,310.86,276.22,384.46,341.17,310.86,276.22,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,655.15,581.37,529.73,470.71,622.60,552.49,503.42,447.33,655.15,581.37,529.73,470.71,655.15,581.37,529.73,470.71,208.29,188.45,174.56,158.68,68.94,62.15,57.39,51.95,84.84,75.28,68.60,60.96,68.60,62.76,58.67,53.99,68.60,62.76,58.67,53.99,157.25,141.96,131.26,119.03,157.25,141.96,131.26,119.03,157.25,141.96,131.26,119.03,172.86,153.40,139.77,124.20,189.16,167.86,152.95,135.91,96.67,90.22,85.72,80.56,96.67,90.22,85.72,80.56,147.00,132.40,122.18,110.50,270.62,240.15,218.81,194.43,240.70,213.60,194.62,172.94,193.04,171.30,156.08,138.69,125.44,111.31,101.42,90.12,189.16,167.86,152.95,135.91,317.16,281.44,256.44,227.87,286.36,254.11,231.54,205.74,562.34,530.79,508.70,483.45,69.63,65.41,62.45,59.06,152.01,134.89,122.91,109.22,91.24,80.97,73.78,65.56,64.52,58.82,54.84,50.29,171.52,152.21,138.69,123.24,894.21,793.52,723.03,642.47,172.86,153.40,139.77,124.20,193.77,171.95,156.68,139.22,203.06,185.74,173.61,159.75,286.36,254.11,231.54,205.74,556.70,494.02,450.13,399.98,203.06,185.74,173.61,159.75,142.37,128.54,118.86,107.79,397.34,357.65,329.86,298.10,193.04,171.30,156.08,138.69,210.05,191.73,178.90,164.25,152.01,134.89,122.91,109.22,152.01,134.89,122.91,109.22,286.36,254.11,231.54,205.74,206.42,183.18,166.91,148.31,87.05,77.24,70.38,62.54,10.05,9.19,8.59,7.90,51.94,47.50,44.40,40.85,106.77,96.32,89.00,80.63,165.06,148.39,136.73,123.39,108.84,98.13,90.63,82.06,232.63,209.25,192.88,174.17,53.72,49.13,45.92,42.25,18.22,16.67,15.58,14.34]
+    TO: [384.46,341.17,310.86,276.22,384.46,341.17,310.86,276.22,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,193.04,171.30,156.08,138.69,655.15,581.37,529.73,470.71,622.60,552.49,503.42,447.33,655.15,581.37,529.73,470.71,655.15,581.37,529.73,470.71,208.29,188.45,174.56,158.68,68.94,62.15,57.39,51.95,84.84,75.28,68.60,60.96,68.60,62.76,58.67,53.99,68.60,62.76,58.67,53.99,157.25,141.96,131.26,119.03,157.25,141.96,131.26,119.03,157.25,141.96,131.26,119.03,172.86,153.40,139.77,124.20,189.16,167.86,152.95,135.91,96.67,90.22,85.72,80.56,96.67,90.22,85.72,80.56,147.00,132.40,122.18,110.50,270.62,240.15,218.81,194.43,240.70,213.60,194.62,172.94,193.04,171.30,156.08,138.69,125.44,111.31,101.42,90.12,189.16,167.86,152.95,135.91,317.16,281.44,256.44,227.87,286.36,254.11,231.54,205.74,562.34,530.79,508.70,483.45,69.63,65.41,62.45,59.06,152.01,134.89,122.91,109.22,91.24,80.97,73.78,65.56,64.52,58.82,54.84,50.29,171.52,152.21,138.69,123.24,894.21,793.52,723.03,642.47,172.86,153.40,139.77,124.20,193.77,171.95,156.68,139.22,203.06,185.74,173.61,159.75,286.36,254.11,231.54,205.74,556.70,494.02,450.13,399.98,203.06,185.74,173.61,159.75,142.37,128.54,118.86,109.64,397.34,357.65,329.86,298.10,193.04,171.30,156.08,138.69,210.05,191.73,178.90,164.25,152.01,134.89,122.91,109.22,152.01,134.89,122.91,109.22,286.36,254.11,231.54,205.74,206.42,183.18,166.91,148.31,87.05,77.24,70.38,62.54,10.05,9.19,8.59,7.90,51.94,47.50,44.40,40.85,106.77,96.32,89.00,80.63,165.06,148.39,136.73,123.39,108.84,98.13,90.63,82.06,232.63,209.25,192.88,174.17,53.72,49.13,45.92,42.25,18.22,16.67,15.58,14.34]
 };
 
-// Mapear dados para o formato PRODUTOS[UF]
-Object.keys(precosPorEstado).forEach(function(uf) {
-    var precos = precosPorEstado[uf];
-    PRODUTOS[uf] = itensComuns.map(function(item, idx) {
-        var start = idx * 4;
-        return {
-            sku: item.sku,
-            nome: item.nome,
-            pv: item.pv,
-            pvc: item.pvc,
-            p: [precos[start], precos[start+1], precos[start+2], precos[start+3]]
-        };
-    });
+// ==========================================
+// 3. LÓGICA DE INICIALIZAÇÃO E EVENTOS
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    popularUFs();
+    configurarEventos();
+    renderProdutos();
+    atualizarCarrinho();
 });
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', function() {
-    var inp = document.getElementById('inp-name');
-    if (inp) {
-        inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') entrar(); });
-        inp.focus();
+function popularUFs() {
+    const select = document.getElementById('ufSelector');
+    Object.keys(precosPorEstado).sort().forEach(uf => {
+        const opt = document.createElement('option');
+        opt.value = uf;
+        opt.textContent = `Estado de Entrega: ${uf}`;
+        if(uf === "SP") opt.selected = true;
+        select.appendChild(opt);
+    });
+}
+
+function configurarEventos() {
+    // UF Selector
+    document.getElementById('ufSelector').addEventListener('change', (e) => {
+        ufAtual = e.target.value;
+        renderProdutos();
+        atualizarCarrinho();
+    });
+
+    // IPI Buttons
+    document.querySelectorAll('#ipiButtons .tax-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#ipiButtons .tax-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            ipiAtual = parseFloat(btn.dataset.value);
+            renderProdutos();
+            atualizarCarrinho();
+        });
+    });
+
+    // ICMS Buttons
+    document.querySelectorAll('#icmsButtons .tax-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#icmsButtons .tax-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            icmsAtual = parseFloat(btn.dataset.value);
+            renderProdutos();
+            atualizarCarrinho();
+        });
+    });
+
+    // Cart Drawer Controls
+    document.getElementById('cartFloatBtn').addEventListener('click', toggleCart);
+    document.getElementById('closeCart').addEventListener('click', toggleCart);
+    document.getElementById('cartOverlay').addEventListener('click', toggleCart);
+    document.getElementById('limparCarrinho').addEventListener('click', () => {
+        if(confirm("Deseja limpar todo o seu pedido?")) {
+            carrinho = [];
+            atualizarCarrinho();
+            renderProdutos();
+        }
+    });
+}
+
+function toggleCart() {
+    const drawer = document.getElementById('cartDrawer');
+    const overlay = document.getElementById('cartOverlay');
+    drawer.classList.toggle('active');
+    overlay.style.display = drawer.classList.contains('active') ? 'block' : 'none';
+}
+
+// ==========================================
+// 4. LÓGICA DE CÁLCULO E RENDERIZAÇÃO
+// ==========================================
+
+function getFaixaAtiva() {
+    const totalPV = carrinho.reduce((acc, item) => acc + (item.pv * item.qtd), 0);
+    let faixa = FAIXAS[0];
+    for (let f of FAIXAS) {
+        if (totalPV >= f.pv) faixa = f;
     }
-});
+    return faixa;
+}
+
+function calcularPrecoFinal(baseCD, fatorDesconto) {
+    // baseCD é o valor no array precosPorEstado (já em 25% no PDF original)
+    // fatorDesconto é o multiplicador da faixa (0.86 para 35%, etc)
+    const impostos = 1 + ipiAtual + icmsAtual;
+    return baseCD * fatorDesconto * impostos;
+}
+
+function renderProdutos() {
+    const container = document.getElementById('listaProdutos');
+    container.innerHTML = '';
+    
+    const faixaAtiva = getFaixaAtiva();
+
+    itensComuns.forEach((item, index) => {
+        const precoBaseUF = precosPorEstado[ufAtual][index];
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        
+        // Valores para a tabela do card (Consumidor ate 50%)
+        const pCons = precoBaseUF * 1.33 * (1 + ipiAtual + icmsAtual);
+        const p25 = calcularPrecoFinal(precoBaseUF, 1.00);
+        const p35 = calcularPrecoFinal(precoBaseUF, 0.86);
+        const p42 = calcularPrecoFinal(precoBaseUF, 0.77);
+        const p50 = calcularPrecoFinal(precoBaseUF, 0.67);
+
+        card.innerHTML = `
+            <span class="sku-tag">SKU: ${item.sku}</span>
+            <strong class="product-name">${item.nome}</strong>
+            <div class="product-pv">${item.pv.toFixed(2)} PV</div>
+            
+            <div class="price-table">
+                <div class="price-col">
+                    <span class="price-label">Cons.</span>
+                    <span class="price-value">${fmt(pCons)}</span>
+                </div>
+                <div class="price-col ${faixaAtiva.desconto === 0.25 ? 'active' : ''}">
+                    <span class="price-label">25%</span>
+                    <span class="price-value">${fmt(p25)}</span>
+                </div>
+                <div class="price-col ${faixaAtiva.desconto === 0.35 ? 'active' : ''}">
+                    <span class="price-label">35%</span>
+                    <span class="price-value">${fmt(p35)}</span>
+                </div>
+                <div class="price-col ${faixaAtiva.desconto === 0.42 ? 'active' : ''}">
+                    <span class="price-label">42%</span>
+                    <span class="price-value">${fmt(p42)}</span>
+                </div>
+                <div class="price-col ${faixaAtiva.desconto === 0.50 ? 'active' : ''}">
+                    <span class="price-label">50%</span>
+                    <span class="price-value">${fmt(p50)}</span>
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <input type="number" value="1" min="1" class="qty-input" id="qty-${item.sku}">
+                <button class="add-btn" onclick="adicionarAoCarrinho(${index})">Adicionar</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    atualizarProgresso();
+}
+
+function adicionarAoCarrinho(idx) {
+    const itemOrig = itensComuns[idx];
+    const inputQty = document.getElementById(`qty-${itemOrig.sku}`);
+    const qty = parseInt(inputQty.value) || 1;
+    
+    const indexExistente = carrinho.findIndex(c => c.sku === itemOrig.sku);
+    
+    if (indexExistente > -1) {
+        carrinho[indexExistente].qtd += qty;
+    } else {
+        carrinho.push({
+            sku: itemOrig.sku,
+            nome: itemOrig.nome,
+            pv: itemOrig.pv,
+            baseCD: precosPorEstado[ufAtual][idx],
+            qtd: qty
+        });
+    }
+    
+    inputQty.value = 1; // Reseta input
+    atualizarCarrinho();
+    renderProdutos(); // Atualiza destaques de faixa se o PV mudou
+}
+
+function removerDoCarrinho(sku) {
+    carrinho = carrinho.filter(i => i.sku !== sku);
+    atualizarCarrinho();
+    renderProdutos();
+}
+
+function atualizarCarrinho() {
+    const container = document.getElementById('itensCarrinho');
+    container.innerHTML = '';
+    
+    let totalPV = 0;
+    let totalReal = 0;
+    let baseSemImposto = 0;
+    
+    const faixa = getFaixaAtiva();
+
+    carrinho.forEach(item => {
+        const vPV = item.pv * item.qtd;
+        const valorUnitario = calcularPrecoFinal(item.baseCD, faixa.fator);
+        const valorTotalItem = valorUnitario * item.qtd;
+        
+        totalPV += vPV;
+        totalReal += valorTotalItem;
+        baseSemImposto += (item.baseCD * faixa.fator * item.qtd);
+
+        const row = document.createElement('div');
+        row.style.cssText = "padding: 1rem; border-bottom: 1px solid var(--border); position: relative;";
+        row.innerHTML = `
+            <div style="font-weight: 700; font-size: 0.9rem; padding-right: 25px;">${item.nome}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0;">
+                ${item.qtd} un x ${fmt(valorUnitario)} | <strong>${vPV.toFixed(2)} PV</strong>
+            </div>
+            <div style="font-weight: 800; color: var(--primary);">${fmt(valorTotalItem)}</div>
+            <button onclick="removerDoCarrinho('${item.sku}')" style="position:absolute; right: 10px; top: 15px; border:none; background:none; cursor:pointer; font-size: 1.1rem;">🗑️</button>
+        `;
+        container.appendChild(row);
+    });
+
+    // Atualizar UI do Carrinho
+    document.getElementById('cartBadge').textContent = carrinho.reduce((a, b) => a + b.qtd, 0);
+    document.getElementById('pvAtual').textContent = totalPV.toFixed(2);
+    document.getElementById('resumoPV').textContent = totalPV.toFixed(2);
+    document.getElementById('resumoSubtotal').textContent = fmt(baseSemImposto);
+    document.getElementById('resumoDesconto').textContent = faixa.label;
+    
+    const impostosTotais = totalReal - baseSemImposto;
+    document.getElementById('resumoImpostos').textContent = fmt(impostosTotais);
+    document.getElementById('resumoTotal').textContent = fmt(totalReal);
+}
+
+function atualizarProgresso() {
+    const totalPV = carrinho.reduce((acc, item) => acc + (item.pv * item.qtd), 0);
+    let target = 500;
+    let prox = "35%";
+    
+    if (totalPV >= 500 && totalPV < 1000) { target = 1000; prox = "42%"; }
+    else if (totalPV >= 1000 && totalPV < 4000) { target = 4000; prox = "50%"; }
+    else if (totalPV >= 4000) { target = 4000; prox = "MAX"; }
+
+    const perc = Math.min((totalPV / target) * 100, 100);
+    document.getElementById('progressBar').style.width = perc + "%";
+    
+    const texto = totalPV >= 4000 
+        ? "Parabéns! Você atingiu o desconto máximo de 50%!" 
+        : `Faltam ${(target - totalPV).toFixed(2)} PV para atingir ${prox}`;
+    document.getElementById('proximoNivel').textContent = texto;
+}
+
+function fmt(v) {
+    return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}

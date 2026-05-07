@@ -1,221 +1,119 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Simulador de Pedidos - Herbalife</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0 }
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f3f4f6; min-height: 100vh; color: #111; }
-        .app { max-width: 1200px; margin: 0 auto; padding: 16px }
-        
-        /* WELCOME SCREEN */
-        #welcome-screen { position: fixed; inset: 0; background: #fff; z-index: 999; display: flex; align-items: center; justify-content: center }
-        .welcome-box { background: #fff; border-radius: 16px; box-shadow: 0 4px 32px rgba(0,0,0,.12); padding: 40px; max-width: 440px; width: 90%; text-align: center }
-        .welcome-logo { width: 64px; height: 64px; background: linear-gradient(135deg,#00a651,#007a3d); border-radius: 14px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; font-weight: 800 }
-        .welcome-box h1 { font-size: 1.4rem; font-weight: 700; color: #111; margin-bottom: 8px }
-        .welcome-box p { font-size: .9rem; color: #555; margin-bottom: 28px; line-height: 1.5 }
-        .welcome-box label { display: block; text-align: left; font-size: .82rem; font-weight: 600; color: #333; margin-bottom: 4px }
-        .welcome-box input { width: 100%; border: 1.5px solid #ddd; border-radius: 8px; padding: 10px 14px; font-size: .95rem; margin-bottom: 16px; outline: none; transition: border .2s }
-        .welcome-box input:focus { border-color: #00a651 }
-        .welcome-box .optional { color: #999; font-weight: 400; font-size: .75rem }
-        .btn-enter { width: 100%; background: linear-gradient(135deg,#00a651,#007a3d); color: #fff; border: none; border-radius: 8px; padding: 13px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .2s }
-        .btn-enter:hover { opacity: .9 }
-        
-        /* MAIN APP */
-        #main-app { display: none }
-        .header { background: #fff; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08) }
-        .header-left { display: flex; align-items: center; gap: 12px }
-        .header-logo { width: 40px; height: 40px; background: linear-gradient(135deg,#00a651,#007a3d); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: 800 }
-        .header-info h2 { font-size: 1rem; font-weight: 700; color: #111 }
-        .header-info p { font-size: .78rem; color: #777 }
-        .cd-badge { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 5px 12px; border-radius: 20px; font-size: .78rem; font-weight: 600; display: flex; align-items: center; gap: 5px }
-        
-        .controls { background: #fff; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 16px; flex-wrap: wrap; box-shadow: 0 1px 4px rgba(0,0,0,.08) }
-        .controls select, .controls input { flex: 1; min-width: 200px; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; font-size: .9rem; outline: none; transition: border .2s }
-        .controls select:focus, .controls input:focus { border-color: #00a651 }
-        
-        .products-area { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08) }
-        .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af }
-        .empty-icon { font-size: 48px; margin-bottom: 12px }
-        
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px }
-        .product-card { border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 14px; transition: border .2s; position: relative }
-        .product-card:hover { border-color: #00a651 }
-        .product-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px }
-        .product-name { font-size: .88rem; font-weight: 600; color: #111; line-height: 1.3 }
-        .product-sku { font-size: .75rem; color: #9ca3af; margin-top: 2px }
-        .pv-tag { font-size: .70rem; color: #6b7280; margin-top: 2px; }
-        
-        .price-bands { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px }
-        .price-bands.has-pvc { grid-template-columns: repeat(5, 1fr) }
-        .price-band { background: #f9fafb; border-radius: 6px; padding: 6px 4px; text-align: center; border: 1.5px solid transparent; transition: all .2s }
-        .price-band.active { background: #f0fdf4; border-color: #00a651 }
-        .price-band.pvc { background: #fff8e1; border-color: #f59e0b; }
-        .price-band-label { font-size: .60rem; color: #6b7280; margin-bottom: 2px; font-weight: 600; }
-        .price-band.pvc .price-band-label { color: #92400e; font-weight: 700; }
-        .price-band-value { font-size: .78rem; font-weight: 700; color: #111 }
-        .price-band.pvc .price-band-value { color: #92400e; }
-        .price-band.active .price-band-value { color: #00a651 }
-        
-        .cart-row { display: flex; align-items: center; gap: 8px; margin-top: 8px }
-        .qty-control { display: flex; align-items: center; border: 1.5px solid #e5e7eb; border-radius: 6px; overflow: hidden }
-        .qty-btn { background: #f9fafb; border: none; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center }
-        .qty-btn:hover { background: #e5e7eb }
-        .qty-input { border: none; width: 36px; height: 28px; text-align: center; font-size: .85rem; font-weight: 600; outline: none }
-        
-        .cart-section { background: #fff; border-radius: 12px; padding: 20px; margin-top: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); display: none }
-        .cart-section.visible { display: block }
-        .cart-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px }
-        .cart-table { width: 100%; border-collapse: collapse; font-size: .85rem }
-        .cart-table th { background: #f9fafb; padding: 8px 10px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #e5e7eb }
-        .cart-table td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6 }
-        .cart-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 2px solid #e5e7eb }
-        .cart-total { font-size: 1.1rem; font-weight: 700 }
-        .cart-total span { color: #00a651 }
-        .btn-pdf { background: linear-gradient(135deg,#00a651,#007a3d); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: .85rem; cursor: pointer; font-weight: 600 }
-        .btn-clear { background: #fff; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 8px 16px; font-size: .85rem; cursor: pointer; color: #555 }
-        
-        /* PROGRESS BAR & PV STATUS */
-        .pv-status-container { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-        .pv-stats { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
-        .pv-main-info { display: flex; flex-direction: column; }
-        .pv-label { font-size: 0.75rem; color: #166534; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; }
-        .pv-value { font-size: 1.5rem; font-weight: 800; color: #111; line-height: 1.2; }
-        .pv-discount-badge { background: #00a651; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; margin-top: 4px; display: inline-block; width: fit-content; }
-        
-        .pv-next-step { text-align: right; }
-        .pv-next-label { font-size: 0.72rem; color: #6b7280; margin-bottom: 2px; }
-        .pv-next-value { font-size: 0.85rem; font-weight: 700; color: #111; }
-        .pv-missing { font-size: 0.72rem; color: #00a651; font-weight: 600; }
-
-        .progress-container { background: #e5e7eb; border-radius: 10px; height: 10px; width: 100%; overflow: hidden; position: relative; }
-        .progress-bar { background: linear-gradient(90deg, #00a651, #059669); height: 100%; width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px; }
-
-        @media (max-width: 640px) {
-            .controls { flex-direction: column }
-            .price-bands { grid-template-columns: repeat(2, 1fr) !important }
-            .header { flex-direction: column; gap: 12px; text-align: center }
-            .pv-stats { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .pv-next-step { text-align: left; }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Pedidos - Herbalife Premium</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="welcome-screen">
-        <div class="welcome-box">
-            <div class="welcome-logo">H</div>
-            <h1>Simulador de Pedidos</h1>
-            <p>Ferramenta exclusiva para distribuidores independentes Herbalife.</p>
-            <label for="inp-name">Nome do Distribuidor <span style="color:#dc2626">*</span></label>
-            <input type="text" id="inp-name" placeholder="Seu nome completo" required>
-            <label for="inp-id">ID Herbalife <span class="optional">(opcional)</span></label>
-            <input type="text" id="inp-id" placeholder="Ex: 123456789">
-            <button class="btn-enter" onclick="entrar()">Entrar no Simulador</button>
+
+    <header>
+        <h1>Simulador de Pedidos Herbalife</h1>
+    </header>
+
+    <main class="container">
+        
+        <!-- SELETOR DE UF E ALÍQUOTAS -->
+        <section class="tax-selector">
+            <div class="tax-group">
+                <label class="tax-label">Estado (UF) para Preços</label>
+                <select id="ufSelector" class="qty-input" style="width: 100%; height: 45px; margin-bottom: 1.5rem; background: #fff; cursor: pointer;">
+                    <!-- Populado via JS -->
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="tax-group">
+                    <label class="tax-label">Alíquota IPI</label>
+                    <div class="tax-buttons" id="ipiButtons">
+                        <button class="tax-btn active" data-value="0.05">5%</button>
+                        <button class="tax-btn" data-value="0.13">13%</button>
+                        <button class="tax-btn" data-value="0.21">21%</button>
+                        <button class="tax-btn" data-value="0.29">29%</button>
+                    </div>
+                </div>
+
+                <div class="tax-group">
+                    <label class="tax-label">Alíquota ICMS ST</label>
+                    <div class="tax-buttons" id="icmsButtons">
+                        <button class="tax-btn active" data-value="0.09">9%</button>
+                        <button class="tax-btn" data-value="0.17">17%</button>
+                        <button class="tax-btn" data-value="0.25">25%</button>
+                        <button class="tax-btn" data-value="0.33">33%</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BARRA DE PROGRESSÃO PV -->
+        <section class="progression-card">
+            <div class="pv-info">
+                <div>
+                    <span class="tax-label">Pontos de Volume (PV)</span>
+                    <div id="pvAtual" class="pv-current">0.00</div>
+                </div>
+                <div id="proximoNivel" class="pv-target">
+                    Faltam 500.00 PV para 35%
+                </div>
+            </div>
+            <div class="progress-track">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+        </section>
+
+        <!-- GRID DE PRODUTOS -->
+        <div id="listaProdutos" class="product-grid">
+            <!-- Cards gerados via JS -->
         </div>
+
+    </main>
+
+    <!-- CARRINHO FLUTUANTE -->
+    <div id="cartFloatBtn" class="cart-float-btn">
+        <span>🛒</span>
+        <span>Carrinho</span>
+        <div id="cartBadge" class="cart-badge">0</div>
     </div>
 
-    <div id="main-app">
-        <div class="app">
-            <div class="header">
-                <div class="header-left">
-                    <div class="header-logo">H</div>
-                    <div class="header-info">
-                        <h2>Simulador de Pedidos</h2>
-                        <p id="header-distribuidor">Distribuidor Independente</p>
-                    </div>
-                </div>
-                <div class="header-right">
-                    <div class="cd-badge" id="uf-badge">🏠 CD &middot; Selecione o Estado</div>
-                </div>
-            </div>
+    <!-- DRAWER DO CARRINHO -->
+    <div id="cartOverlay" class="cart-overlay"></div>
+    <div id="cartDrawer" class="cart-drawer">
+        <div class="cart-header">
+            <h2 style="font-weight: 800; color: var(--primary);">Seu Pedido</h2>
+            <button id="closeCart" style="background:none; border:none; font-size: 1.5rem; cursor:pointer; color: var(--text-muted);">✕</button>
+        </div>
+        
+        <div id="itensCarrinho" class="cart-items">
+            <!-- Itens do carrinho aqui -->
+        </div>
 
-            <div class="controls">
-                <select id="sel-estado" onchange="onEstado()">
-                    <option value="">— Selecionar estado de entrega —</option>
-                    <option value="AC">Acre</option>
-                    <option value="AL">Alagoas</option>
-                    <option value="AM">Amazonas</option>
-                    <option value="AP">Amapá</option>
-                    <option value="BA">Bahia</option>
-                    <option value="CE">Ceará</option>
-                    <option value="DF">Distrito Federal</option>
-                    <option value="ES">Espírito Santo</option>
-                    <option value="GO">Goiás</option>
-                    <option value="MA">Maranhão</option>
-                    <option value="MG">Minas Gerais</option>
-                    <option value="MS">Mato Grosso do Sul</option>
-                    <option value="MT">Mato Grosso</option>
-                    <option value="PA">Pará</option>
-                    <option value="PB">Paraíba</option>
-                    <option value="PE">Pernambuco</option>
-                    <option value="PI">Piauí</option>
-                    <option value="PR">Paraná</option>
-                    <option value="RJ">Rio de Janeiro</option>
-                    <option value="RN">Rio Grande do Norte</option>
-                    <option value="RO">Rondônia</option>
-                    <option value="RR">Roraima</option>
-                    <option value="RS">Rio Grande do Sul</option>
-                    <option value="SC">Santa Catarina</option>
-                    <option value="SE">Sergipe</option>
-                    <option value="SP">São Paulo</option>
-                    <option value="TO">Tocantins</option>
-                </select>
-                <input type="text" id="inp-busca" placeholder="🔍 SKU ou nome... ex: shake, 023K" oninput="renderProdutos()" disabled>
+        <div class="cart-footer">
+            <button id="limparCarrinho" class="clear-cart-btn">Limpar Carrinho</button>
+            
+            <div class="cart-summary-row">
+                <span>Subtotal (Base)</span>
+                <span id="resumoSubtotal">R$ 0,00</span>
             </div>
-
-            <!-- STATUS DE PV NO TOPO DO APP QUANDO TIVER ITENS -->
-            <div id="pv-summary-top" style="display:none">
-                <div class="pv-status-container">
-                    <div class="pv-stats">
-                        <div class="pv-main-info">
-                            <span class="pv-label">Volume Acumulado</span>
-                            <span class="pv-value" id="pv-total-display">0.00 PV</span>
-                            <span class="pv-discount-badge" id="discount-badge">Desconto: 25%</span>
-                        </div>
-                        <div class="pv-next-step" id="next-tier-container">
-                            <div class="pv-next-label">Próximo Nível: <span id="next-tier-label">35%</span></div>
-                            <div class="pv-next-value" id="next-tier-goal">500 PV</div>
-                            <div class="pv-missing" id="pv-missing-display">Faltam 500.00 PV</div>
-                        </div>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="pv-progress-bar"></div>
-                    </div>
-                </div>
+            <div class="cart-summary-row">
+                <span>Total PV</span>
+                <span id="resumoPV" style="font-weight: 700; color: var(--primary);">0.00</span>
             </div>
-
-            <div id="produtos-area" class="products-area">
-                <div class="empty-state">
-                    <div class="empty-icon">📍</div>
-                    <p><strong>Selecione o estado de entrega</strong></p>
-                </div>
+            <div class="cart-summary-row">
+                <span>Desconto Aplicado</span>
+                <span id="resumoDesconto">0%</span>
             </div>
-
-            <div class="cart-section" id="cart-section">
-                <div class="cart-title">🛒 Carrinho de Pedido</div>
-                <table class="cart-table">
-                    <thead>
-                        <tr>
-                            <th>Produto</th>
-                            <th>SKU</th>
-                            <th>Qtd</th>
-                            <th>Preço Unit.</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cart-tbody"></tbody>
-                </table>
-                <div class="cart-footer">
-                    <div>
-                        <div class="cart-total">Total: <span id="cart-total-val">R$ 0,00</span></div>
-                        <div id="faixa-label" style="font-size: .75rem; color: #6b7280; margin-top: 4px"></div>
-                    </div>
-                    <div class="cart-actions">
-                        <button class="btn-clear" onclick="limparCarrinho()">Limpar</button>
-                        <button class="btn-pdf" onclick="gerarPDF()">📄 Exportar PDF</button>
-                    </div>
-                </div>
+            <div class="cart-summary-row" style="font-size: 0.8rem; color: var(--text-muted);">
+                <span>Impostos (IPI + ST)</span>
+                <span id="resumoImpostos">R$ 0,00</span>
+            </div>
+            
+            <div id="totalFinal" class="cart-total-row" style="padding-top: 1rem; border-top: 2px solid var(--border); margin-top: 1rem;">
+                <span>Total Final</span>
+                <span id="resumoTotal">R$ 0,00</span>
             </div>
         </div>
     </div>
