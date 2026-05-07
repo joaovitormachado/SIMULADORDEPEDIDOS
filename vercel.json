@@ -3,7 +3,8 @@
   "name": "simulador-de-pedidos-herbalife",
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
-    { "src": "script.js", "use": "@vercel/static" }
+    { "src": "script.js", "use": "@vercel/static" },
+    { "src": "precos.js", "use": "@vercel/static" }
   ],
   "routes": [
     { "handle": "filesystem" },
