@@ -5,7 +5,7 @@
 
 const SUPABASE_URL = 'https://jrbzvtbpzqjehakaqscz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_JyHOGdaA9cNU9H_l4DErSA_lmTiupe5';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase;
 
 // Estado Global
 let ufAtual = "SP";
@@ -32,6 +32,14 @@ const ESTADOS_BR = [
 ];
 
 document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        if (!window.supabase) throw new Error("SDK do Supabase não carregou. Verifique sua conexão ou desative bloqueadores de anúncio.");
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(err) {
+        alert(err.message);
+        return;
+    }
+
     estadosDisponiveis = ESTADOS_BR;
     popularUFs();
     // 1. Garante que ufAtual existe, se não, pega o primeiro
@@ -200,8 +208,11 @@ function renderProdutos() {
     const faixaAtiva = getFaixaAtiva();
 
     produtos.forEach((item) => {
+        const nomeSeguro = item.nome || "Produto sem nome";
+        const skuSeguro = item.sku || "N/A";
+
         if (termoBusca) {
-            if (!item.nome.toLowerCase().includes(termoBusca) && !item.sku.toLowerCase().includes(termoBusca)) {
+            if (!nomeSeguro.toLowerCase().includes(termoBusca) && !skuSeguro.toLowerCase().includes(termoBusca)) {
                 return;
             }
         }
@@ -215,9 +226,10 @@ function renderProdutos() {
         const is50 = faixaAtiva.key === "preco_50" ? 'active' : '';
 
         card.innerHTML = `
-            <span class="sku-tag">SKU: ${item.sku}</span>
-            <strong class="product-name">${item.nome}</strong>
-            <div class="product-pv">${Number(item.pv).toFixed(2)} PV</div>
+            <span class="sku-tag">SKU: ${skuSeguro}</span>
+            <strong class="product-name">${nomeSeguro}</strong>
+            <div class="product-pv">${Number(item.pv || 0).toFixed(2)} PV</div>
+
             
             <div class="price-table">
                 <div class="price-col">
