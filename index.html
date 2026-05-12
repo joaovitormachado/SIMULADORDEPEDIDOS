@@ -6,8 +6,9 @@
     <title>Simulador de Pedidos</title>
     <style>
         :root {
-            --primary: #78be20; /* Verde Herbalife */
-            --primary-dark: #5a8f18;
+            --primary: #7AC70C; /* Verde Herbalife (agora unificado) */
+            --primary-green: #7AC70C; /* Alias global solicitado */
+            --primary-dark: #68A70A;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #1e293b;
@@ -327,7 +328,7 @@
 
         .btn-pdf-premium {
             width: 100%;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: var(--primary-green);
             color: white;
             border: none;
             padding: 1rem 1.5rem;
@@ -341,15 +342,15 @@
             margin-top: 1.5rem;
             font-size: 1.05rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .btn-pdf-premium:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            filter: brightness(1.1);
+            filter: brightness(0.92);
+            box-shadow: var(--shadow-lg);
         }
         
         .btn-pdf-premium:active {
@@ -1108,7 +1109,7 @@
                 </select>
             </div>
             <button onclick="gerarListaPrecosPDF()" class="btn-pdf-premium" style="margin-top: 5px;">
-                <span style="font-size: 1.3rem;">📄</span> Baixar Lista Completa (PDF)
+                <span style="font-size: 1.3rem;">📄</span> BAIXAR LISTA COMPLETA (PDF)
             </button>
         </section>
 
@@ -1205,7 +1206,7 @@
             </div>
 
             <button onclick="gerarPDF()" class="btn-pdf-premium">
-                <span style="font-size: 1.4rem;">🖨️</span> Gerar Recibo PDF
+                <span style="font-size: 1.4rem;">🖨️</span> GERAR PDF DO PEDIDO
             </button>
         </div>
     </div>

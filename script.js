@@ -633,7 +633,7 @@ window.gerarPDF = async function() {
         // Header Title
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(24);
-        doc.setTextColor(120, 190, 32); // #78be20
+        doc.setTextColor(122, 199, 12); // #7AC70C
         doc.text("SIMULADOR DE PEDIDOS", 40, 50);
 
         // Subtitle & Info
@@ -692,7 +692,7 @@ window.gerarPDF = async function() {
                 1: { halign: 'center', fontSize: 8 },
                 2: { halign: 'center', fontStyle: 'bold' },
                 3: { halign: 'right' },
-                4: { halign: 'right', fontStyle: 'bold', textColor: [120, 190, 32] }
+                4: { halign: 'right', fontStyle: 'bold', textColor: [122, 199, 12] }
             },
             margin: { left: 40, right: 40 }
         });
@@ -725,7 +725,7 @@ window.gerarPDF = async function() {
         doc.setTextColor(100, 116, 139);
         doc.text("Total PV:", 320, startY + 45);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(120, 190, 32);
+        doc.setTextColor(122, 199, 12);
         doc.text(totalPV.toFixed(2), 535, startY + 45, { align: 'right' });
 
         doc.setFont('helvetica', 'normal');
@@ -741,7 +741,7 @@ window.gerarPDF = async function() {
 
         // TOTAL
         doc.setFontSize(14);
-        doc.setTextColor(120, 190, 32);
+        doc.setTextColor(122, 199, 12);
         doc.text("TOTAL:", 320, startY + 105);
         doc.text(fmt(totalReal), 535, startY + 105, { align: 'right' });
 
@@ -754,7 +754,7 @@ window.gerarPDF = async function() {
                 infoY = 40;
             }
             doc.setFillColor(255, 255, 255);
-            doc.setDrawColor(120, 190, 32);
+            doc.setDrawColor(122, 199, 12);
             doc.setLineDashPattern([3, 3], 0);
             doc.roundedRect(40, infoY, 515, 60, 6, 6, 'FD');
             doc.setLineDashPattern([], 0); // reset
@@ -766,7 +766,7 @@ window.gerarPDF = async function() {
             
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
-            doc.setTextColor(120, 190, 32);
+            doc.setTextColor(122, 199, 12);
             doc.text(`${(saldoPontos + totalPV).toFixed(2)} PV`, 297, infoY + 40, { align: 'center' });
             
             doc.setFontSize(8);
@@ -828,7 +828,7 @@ window.gerarListaPrecosPDF = async function() {
         // Header Title
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(22);
-        doc.setTextColor(120, 190, 32); // #78be20
+        doc.setTextColor(122, 199, 12); // #7AC70C
         doc.text("LISTA DE PRECOS", 40, 50);
 
         // Subtitle & Info
@@ -879,7 +879,7 @@ window.gerarListaPrecosPDF = async function() {
                 4: { halign: 'right' },
                 5: { halign: 'right' },
                 6: { halign: 'right' },
-                7: { halign: 'right', fontStyle: 'bold', textColor: [120, 190, 32] }
+                7: { halign: 'right', fontStyle: 'bold', textColor: [122, 199, 12] }
             },
             margin: { top: 40, left: 40, right: 40, bottom: 40 },
             styles: {
