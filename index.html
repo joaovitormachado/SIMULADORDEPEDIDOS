@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Pedidos - Herbalife Premium</title>
+    <title>Simulador de Pedidos</title>
     <style>
         :root {
             --primary: #78be20; /* Verde Herbalife */
@@ -33,20 +33,42 @@
 
         header {
             background: white;
-            padding: 1.5rem;
+            padding: 1rem 1.5rem;
             text-align: center;
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         header h1 {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 800;
             color: var(--primary);
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #fff1f2;
+            color: #e11d48;
+            border-color: #fda4af;
         }
 
         .container {
@@ -88,8 +110,8 @@
         /* --- SELETOR DE UF --- */
         .uf-selector-card {
             background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 20px;
+            padding: 1rem 1.5rem;
             margin-bottom: 1rem;
             box-shadow: var(--shadow);
         }
@@ -103,47 +125,78 @@
             text-transform: uppercase;
         }
 
-        /* --- BARRA DE PROGRESSO --- */
-        .progression-card {
+        /* --- SELETOR DE DESCONTO --- */
+        .discount-selector-card {
             background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            border-radius: 20px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
             box-shadow: var(--shadow);
         }
 
-        .pv-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 0.75rem;
-        }
-
-        .pv-current {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .pv-target {
-            font-size: 0.875rem;
+        .discount-title {
+            font-size: 0.8rem;
+            font-weight: 600;
             color: var(--text-muted);
-            text-align: right;
+            margin-bottom: 0.75rem;
+            display: none;
         }
 
-        .progress-track {
-            height: 12px;
+        .discount-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .discount-badge {
             background: var(--bg);
-            border-radius: 99px;
-            overflow: hidden;
-            position: relative;
+            border: 2px solid transparent;
+            padding: 0.5rem 0.25rem;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: var(--text-muted);
+            opacity: 0.6;
+            min-height: 50px;
+            cursor: pointer;
         }
 
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), #a3e635);
-            width: 0%;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        .discount-selector-card:not(.auto-mode) .discount-badge:hover:not(.disabled) {
+            transform: translateY(-2px);
+            opacity: 1;
+            background: white;
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+
+        .discount-selector-card.auto-mode .discount-badge {
+            cursor: default;
+        }
+
+        .discount-badge.active {
+            background: rgba(120, 190, 32, 0.08);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: scale(1.02);
+            opacity: 1;
+            box-shadow: 0 4px 10px -2px rgb(120 190 32 / 0.15);
+        }
+
+        .discount-badge span {
+            font-size: 1.1rem;
+            display: block;
+            line-height: 1.2;
+        }
+
+        .discount-badge small {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         /* --- GRID DE PRODUTOS --- */
@@ -234,6 +287,12 @@
 
         .price-col.active .price-label { color: var(--primary); }
 
+        .price-col.disabled {
+            opacity: 0.4;
+            filter: grayscale(0.8);
+        }
+
+
         /* --- BOTÕES DE AÇÃO --- */
         .card-actions {
             margin-top: 1rem;
@@ -242,7 +301,7 @@
         }
 
         .qty-input {
-            width: 60px;
+            width: 80px;
             padding: 0.5rem;
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -264,6 +323,37 @@
 
         .add-btn:hover {
             background: var(--primary-dark);
+        }
+
+        .btn-pdf {
+            width: 100%;
+            background: #27ae60; /* Verde PDF */
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+        }
+
+        .btn-pdf:hover {
+            background: #219150;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.3);
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: absolute; left: 0; top: 0; width: 100%; }
         }
 
         /* --- CARRINHO FLUTUANTE --- */
@@ -299,6 +389,204 @@
             align-items: center;
             justify-content: center;
             font-size: 0.75rem;
+        }
+
+        /* --- LOGIN SCREEN PREMIUM (LIGHT MODE) --- */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8fffa 0%, #eef9ee 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.6s ease, visibility 0.6s;
+            overflow: hidden;
+        }
+
+        .login-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* --- ANIMAÇÃO DE FUNDO PREMIUM --- */
+        .login-bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: floatBlob 15s infinite alternate ease-in-out;
+            will-change: transform;
+        }
+
+        .blob-1 {
+            width: 40vw;
+            height: 40vw;
+            min-width: 300px;
+            min-height: 300px;
+            background: rgba(120, 190, 32, 0.15);
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 50vw;
+            height: 50vw;
+            min-width: 400px;
+            min-height: 400px;
+            background: rgba(80, 200, 120, 0.12);
+            bottom: -20%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 30px) scale(1.1); }
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            padding: 2.5rem;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 25px 50px -12px rgba(120, 190, 32, 0.15), 0 0 40px rgba(120, 190, 32, 0.05);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .login-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .login-logo span {
+            color: var(--primary);
+        }
+
+        .login-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            display: block;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .login-form-group {
+            text-align: left;
+            margin-bottom: 1.25rem;
+        }
+
+        .login-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .login-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .login-input:focus {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 3px rgba(120, 190, 32, 0.15);
+        }
+
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #78be20 0%, #5a9117 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px -6px rgba(120, 190, 32, 0.6);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -8px rgba(120, 190, 32, 0.8);
+            filter: brightness(1.1);
+        }
+
+        .login-footer {
+            margin-top: 2.5rem;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        /* --- LOADING OVERLAY --- */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
         }
 
         /* --- DRAWER DO CARRINHO --- */
@@ -395,17 +683,112 @@
             padding-top: 1rem;
             border-top: 2px solid var(--border);
             color: var(--primary);
+            word-break: break-word;
         }
 
-        /* --- RESPONSIVIDADE --- */
+        /* --- RESPONSIVIDADE & OTIMIZAÇÃO MOBILE --- */
         @media (max-width: 768px) {
+            body {
+                overflow-x: hidden; /* Evita scroll horizontal */
+                padding-bottom: 80px;
+            }
+            .container {
+                padding: 0.75rem;
+            }
+            header {
+                padding: 1rem;
+            }
+            header h1 {
+                font-size: 1.1rem;
+            }
             .product-grid {
                 grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            .product-card {
+                padding: 1rem;
+                border-radius: 16px;
+            }
+            .product-name {
+                font-size: 0.95rem;
+                height: auto;
+                min-height: 2.2rem;
+            }
+            .price-table {
+                margin-top: 0.75rem;
+                padding-top: 0.75rem;
+                gap: 2px;
+            }
+            .price-label {
+                font-size: 0.6rem;
+            }
+            .price-value {
+                font-size: 0.7rem;
+            }
+            .qty-input {
+                padding: 0.4rem;
+            }
+            .add-btn {
+                padding: 0.75rem;
+                font-size: 0.9rem;
             }
             .cart-float-btn {
                 bottom: 1rem;
                 right: 1rem;
                 padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            .uf-selector-card, .discount-selector-card {
+                padding: 0.75rem 1rem;
+                border-radius: 16px;
+            }
+            .supervisor-card {
+                padding: 0.75rem 1rem;
+                border-radius: 16px;
+                gap: 0.5rem;
+            }
+            .toggle-option {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            .discount-grid {
+                gap: 4px;
+            }
+            .discount-badge {
+                padding: 0.4rem 0.1rem;
+                min-height: 45px;
+                border-radius: 8px;
+            }
+            .discount-badge span {
+                font-size: 0.95rem;
+            }
+            .discount-badge small {
+                font-size: 0.5rem;
+            }
+            .cart-header {
+                padding: 1rem;
+            }
+            .cart-items {
+                padding: 0.75rem;
+            }
+            .cart-footer {
+                padding: 1rem;
+            }
+            .cart-summary-row {
+                font-size: 0.85rem;
+            }
+            .cart-total-row {
+                font-size: 1.1rem;
+            }
+            .tax-info-box {
+                padding: 0.75rem;
+                gap: 6px;
+            }
+            .tax-item span:first-child {
+                font-size: 0.6rem;
+            }
+            .tax-item span:last-child {
+                font-size: 0.9rem;
             }
         }
         /* Loading Spinner */
@@ -423,27 +806,303 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* --- SUPERVISOR TOGGLE --- */
+        .supervisor-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .supervisor-card.active {
+            border-color: var(--primary);
+            background: rgba(120, 190, 32, 0.02);
+        }
+
+        .supervisor-info h3 {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .supervisor-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .toggle-group {
+            display: flex;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px;
+        }
+
+        .toggle-option {
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            background: transparent;
+        }
+
+        .toggle-option.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .toggle-option.active.sim {
+            color: var(--primary);
+        }
+
+        /* --- ESTADOS DESABILITADOS --- */
+        .discount-badge.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .supervisor-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- TAX INFO BOX --- */
+        .tax-info-box {
+            background: rgba(120, 190, 32, 0.05);
+            border: 1px solid rgba(120, 190, 32, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .tax-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .tax-item span:first-child {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tax-item span:last-child {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .mandatory-msg {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 1.25rem;
+            padding: 0.75rem;
+            border-left: 2px solid rgba(120, 190, 32, 0.3);
+            font-style: italic;
+            background: rgba(0,0,0,0.02);
+            border-radius: 0 8px 8px 0;
+        }
+
+        #campoSaldoCard {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            /* Ajustes extra para telas muito pequenas */
+            .supervisor-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .supervisor-info {
+                text-align: center;
+                margin-bottom: 0.5rem;
+            }
+            .toggle-group {
+                justify-content: center;
+            }
+            .toggle-option {
+                flex: 1;
+                text-align: center;
+            }
+            .discount-badge {
+                min-height: 40px;
+            }
+        }
+
+        @media print {
+            body { background: white !important; padding: 0 !important; }
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            header, .cart-float-btn, .discount-selector-card, .search-container, .supervisor-card, .product-grid, footer { 
+                display: none !important; 
+            }
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header>
-        <h1>Simulador de Pedidos Herbalife</h1>
-    </header>
+    <!-- TELA DE LOGIN FAKE -->
+    <div id="loginScreen" class="login-overlay">
+        <div class="login-bg-animation">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+        <div class="login-card">
+            <span class="login-logo">SIMULADOR <span>DE PEDIDOS</span></span>
+            <span class="login-subtitle">Acesso exclusivo para Distribuidores Independentes</span>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="login-form-group">
+                    <label class="login-label">Nome</label>
+                    <div class="login-input-wrapper">
+                        <input type="text" class="login-input" placeholder="Digite seu nome completo" required>
+                    </div>
+                </div>
+                <div class="login-form-group">
+                    <label class="login-label">ID do Consultor</label>
+                    <div class="login-input-wrapper">
+                        <input type="text" class="login-input" placeholder="Digite seu ID" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-login">
+                    <span>Entrar no Sistema</span>
+                    <i style="font-style: normal;">→</i>
+                </button>
+            </form>
 
-    <main class="container">
+            <div class="login-footer">
+                © 2026 Simulador de Pedidos - Acesso Exclusivo
+            </div>
+        </div>
+    </div>
+
+    <!-- LOADING TRANSITION -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <span style="font-weight: 700; color: var(--primary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Sincronizando Dados...</span>
+    </div>
+
+    <!-- CONTEÚDO DO APP (ESCONDIDO ATÉ O LOGIN) -->
+    <div id="appContainer" style="display: none;">
+        <header>
+            <h1>Simulador de Pedidos</h1>
+            <button onclick="handleLogout()" class="btn-logout">Sair</button>
+        </header>
+
+        <main class="container">
         
+        <!-- PERGUNTA PRIMEIRO PEDIDO -->
+        <section id="primeiroPedidoCard" class="supervisor-card active">
+            <div class="supervisor-info">
+                <h3>É seu primeiro pedido?</h3>
+                <div id="primeiroPedidoBadgeCont"><span class="supervisor-badge">✅ Progressão automática ativa</span></div>
+            </div>
+            <div class="toggle-group">
+                <button class="toggle-option" id="orderNao">Não</button>
+                <button class="toggle-option active" id="orderSim">Sim</button>
+            </div>
+        </section>
+
+        <!-- PERGUNTA SUPERVISOR (Só aparece se Primeiro Pedido = NÃO) -->
+        <section id="supervisorCard" class="supervisor-card" style="display: none;">
+            <div class="supervisor-info">
+                <h3>Você já é Supervisor?</h3>
+                <div id="supervisorBadgeCont"></div>
+            </div>
+            <div class="toggle-group">
+                <button class="toggle-option active" id="isSupervisorNao">Não</button>
+                <button class="toggle-option" id="isSupervisorSim">Sim</button>
+            </div>
+        </section>
+        
+        <!-- PERGUNTA SALDO DE PONTOS -->
+        <section id="saldoPontosCard" class="supervisor-card" style="display: none;">
+            <div class="supervisor-info">
+                <h3>Você já possui saldo de pontos no mês?</h3>
+            </div>
+            <div class="toggle-group">
+                <button class="toggle-option active" id="saldoNao">Não</button>
+                <button class="toggle-option" id="saldoSim">Sim</button>
+            </div>
+        </section>
+
+        <!-- CAMPO DE SALDO -->
+        <section id="campoSaldoCard" class="uf-selector-card" style="display: none;">
+            <div class="tax-group">
+                <label class="tax-label">Quantos pontos você já possui?</label>
+                <input type="number" id="inputSaldo" class="search-input" placeholder="0.00" step="0.01" style="padding-left: 1rem;">
+            </div>
+        </section>
+
+
         <!-- SELETOR DE UF -->
-        <section class="uf-selector-card">
+        <section class="uf-selector-card" style="display: flex; flex-direction: column; gap: 10px;">
             <div class="tax-group">
                 <label class="tax-label">Estado (UF) para Preços</label>
                 <select id="ufSelector" class="qty-input" style="width: 100%; height: 45px; background: #fff; cursor: pointer;">
                     <!-- Populado via JS -->
                 </select>
             </div>
+            <button onclick="gerarListaPrecosPDF()" class="btn-pdf" style="margin-top: 5px; padding: 0.75rem; font-size: 0.95rem; background: #1e293b; box-shadow: 0 4px 12px rgba(30, 41, 59, 0.2);">
+                <span>📋</span> Baixar Lista de Preços Completa (PDF)
+            </button>
         </section>
 
         <!-- BARRA DE BUSCA -->
@@ -452,19 +1111,26 @@
             <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nome ou SKU do produto...">
         </section>
 
-        <!-- BARRA DE PROGRESSÃO PV -->
-        <section class="progression-card">
-            <div class="pv-info">
-                <div>
-                    <span class="tax-label">Pontos de Volume (PV)</span>
-                    <div id="pvAtual" class="pv-current">0.00</div>
+        <!-- SELETOR MANUAL DE DESCONTO -->
+        <section class="discount-selector-card auto-mode">
+            <h4 id="discountSectionTitle" class="discount-title">Selecione sua faixa de desconto</h4>
+            <div class="discount-grid">
+                <div class="discount-badge active" data-faixa="25">
+                    <span>25%</span>
+                    <small>Distribuidor</small>
                 </div>
-                <div id="proximoNivel" class="pv-target">
-                    Carregando progresso...
+                <div class="discount-badge" data-faixa="35">
+                    <span>35%</span>
+                    <small>Sênior</small>
                 </div>
-            </div>
-            <div class="progress-track">
-                <div id="progressBar" class="progress-bar"></div>
+                <div class="discount-badge" data-faixa="42">
+                    <span>42%</span>
+                    <small>Sucesso</small>
+                </div>
+                <div class="discount-badge" data-faixa="50">
+                    <span>50%</span>
+                    <small>Supervisor</small>
+                </div>
             </div>
         </section>
 
@@ -500,6 +1166,8 @@
             </button>
             <button id="limparCarrinho" class="clear-cart-btn">Limpar Carrinho</button>
             
+
+
             <div class="cart-summary-row">
                 <span>Subtotal (Tabela)</span>
                 <span id="resumoSubtotal">R$ 0,00</span>
@@ -508,15 +1176,30 @@
                 <span>Total PV</span>
                 <span id="resumoPV" style="font-weight: 700; color: var(--primary);">0.00</span>
             </div>
-            <div class="cart-summary-row">
+            <div class="cart-summary-row" style="margin-bottom: 1rem;">
                 <span>Desconto Ativo</span>
                 <span id="resumoDesconto">25%</span>
+            </div>
+            
+            <div id="rowPrevisaoTotal" style="display: none; border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 10px; margin-bottom: 10px;">
+                <div class="cart-summary-row" style="margin-bottom: 0;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Saldo Informado:</span>
+                    <span id="resumoSaldoInformado" style="font-size: 0.8rem; font-weight: 700;">0.00 PV</span>
+                </div>
+                <div class="cart-summary-row" style="margin-bottom: 0;">
+                    <span style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">Previsão total de pontos:</span>
+                    <span id="resumoPrevisao" style="font-size: 1rem; font-weight: 800; color: var(--primary);">0.00 PV</span>
+                </div>
             </div>
             
             <div id="totalFinal" class="cart-total-row">
                 <span>Total Final</span>
                 <span id="resumoTotal">R$ 0,00</span>
             </div>
+
+            <button onclick="gerarPDF()" class="btn-pdf">
+                <span>🖨️</span> Imprimir / Salvar PDF
+            </button>
         </div>
     </div>
 

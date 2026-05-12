@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const csvPath = 'tabelas_estados_herbalife.csv';
+const csvPath = 'tabelas_estados.csv';
 if (!fs.existsSync(csvPath)) {
     console.error("Arquivo CSV não encontrado!");
     process.exit(1);
