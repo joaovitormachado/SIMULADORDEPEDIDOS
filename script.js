@@ -615,129 +615,176 @@ window.gerarPDF = async function() {
     const loading = document.getElementById('loadingOverlay');
     if (loading) {
         loading.style.display = 'flex';
-        loading.querySelector('span').textContent = 'Gerando arquivo PDF...';
+        loading.querySelector('span').textContent = 'Gerando Recibo PDF...';
     }
-
-    const dataHora = new Date().toLocaleString('pt-BR');
-    const totalPV = carrinho.reduce((sum, item) => sum + (item.pv * item.qtd), 0);
-    const totalReal = carrinho.reduce((sum, item) => {
-        const prodOriginal = cacheEstados[ufAtual].find(p => p.sku === item.sku);
-        const preco = prodOriginal ? Number(prodOriginal[faixaManual.key]) : 0;
-        return sum + (preco * item.qtd);
-    }, 0);
-
-    // Criar o container temporário para a captura
-    let printArea = document.getElementById('printArea');
-    if (!printArea) {
-        printArea = document.createElement('div');
-        printArea.id = 'printArea';
-        document.body.appendChild(printArea);
-    }
-    
-    // Estilo para garantir captura perfeita
-    printArea.style.cssText = "position: absolute; left: 0; top: 0; width: 800px; background: white; padding: 40px; z-index: -9999; color: #1e293b; font-family: 'Inter', sans-serif; visibility: visible;";
-
-    printArea.innerHTML = `
-        <div style="border: 2px solid #78be20; padding: 30px; border-radius: 16px; background: #fff;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 30px;">
-                <div>
-                    <h1 style="color: #78be20; margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Simulador de Pedidos</h1>
-                    <p style="font-size: 12px; color: #64748b; margin-top: 5px; font-weight: 600;">Pedido de Consultor</p>
-                </div>
-                <div style="text-align: right; font-size: 12px; color: #64748b; line-height: 1.6;">
-                    <div>Emitido em: <strong>${dataHora}</strong></div>
-                    <div>Estado de Entrega: <strong>${ufAtual}</strong></div>
-                </div>
-            </div>
-
-            <h2 style="font-size: 18px; margin-bottom: 20px; color: #1e293b; font-weight: 700; border-left: 5px solid #78be20; padding-left: 15px;">Detalhes do Pedido</h2>
-            
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
-                <thead>
-                    <tr style="background: #f8fafc; text-align: left;">
-                        <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Produto</th>
-                        <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center;">Qtd</th>
-                        <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: right;">Unitário</th>
-                        <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: right;">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${carrinho.map(item => {
-                        const prodOriginal = cacheEstados[ufAtual].find(p => p.sku === item.sku);
-                        const preco = prodOriginal ? Number(prodOriginal[faixaManual.key]) : 0;
-                        return `
-                            <tr>
-                                <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
-                                    <div style="font-weight: 700; color: #1e293b;">${item.nome}</div>
-                                    <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">SKU: ${item.sku}</div>
-                                </td>
-                                <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; font-weight: 600;">${item.qtd}</td>
-                                <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right;">${fmt(preco)}</td>
-                                <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #78be20;">${fmt(preco * item.qtd)}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 40px;">
-                <div style="width: 320px; background: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
-                        <span style="color: #64748b;">Subtotal:</span>
-                        <span style="font-weight: 600; color: #1e293b;">${fmt(totalReal)}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
-                        <span style="color: #64748b;">Total PV:</span>
-                        <strong style="color: #78be20;">${totalPV.toFixed(2)}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-top: 1px dashed #cbd5e1; padding-top: 10px; font-size: 14px;">
-                        <span style="color: #64748b;">Desconto Ativo:</span>
-                        <span style="font-weight: 800; color: #1e293b;">${faixaManual.label}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 24px; font-weight: 800; color: #78be20; border-top: 3px solid #78be20; padding-top: 10px;">
-                        <span>TOTAL:</span>
-                        <span>${fmt(totalReal)}</span>
-                    </div>
-                </div>
-            </div>
-
-            ${temSaldoMensal ? `
-            <div style="margin-top: -20px; margin-bottom: 40px; padding: 20px; background: #fff; border: 2px dashed #78be20; border-radius: 12px; text-align: center;">
-                <div style="font-size: 14px; color: #64748b; margin-bottom: 5px;">Seu saldo total previsto de pontos de volume após a efetivação deste pedido é de:</div>
-                <div style="font-size: 24px; font-weight: 800; color: #78be20;">${(saldoPontos + totalPV).toFixed(2)} PV</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-top: 5px;">(Saldo Anterior: ${saldoPontos.toFixed(2)} PV + Pedido Atual: ${totalPV.toFixed(2)} PV)</div>
-            </div>
-            ` : ''}
-
-            <div style="text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 20px;">
-                Simulador de Pedidos | Este documento é um resumo informativo oficial do simulador.
-            </div>
-        </div>
-    `;
 
     try {
-        // Pequeno delay para garantir renderização do CSS no printArea
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 100));
+        const doc = new jsPDF('p', 'pt', 'a4');
+        const dataHora = new Date().toLocaleString('pt-BR');
+        
+        const totalPV = carrinho.reduce((sum, item) => sum + (item.pv * item.qtd), 0);
+        const totalReal = carrinho.reduce((sum, item) => {
+            const prodOriginal = cacheEstados[ufAtual].find(p => p.sku === item.sku);
+            const preco = prodOriginal ? Number(prodOriginal[faixaManual.key]) : 0;
+            return sum + (preco * item.qtd);
+        }, 0);
 
-        const canvas = await html2canvas(printArea, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            logging: false
+        // Header Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(24);
+        doc.setTextColor(120, 190, 32); // #78be20
+        doc.text("SIMULADOR DE PEDIDOS", 40, 50);
+
+        // Subtitle & Info
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139);
+        doc.setFont('helvetica', 'normal');
+        doc.text("Recibo de Pedido do Consultor", 40, 65);
+        
+        // Right side info
+        doc.setFontSize(9);
+        const rightX = 380;
+        doc.text(`Emitido em: ${dataHora}`, rightX, 50);
+        doc.text(`Estado de Entrega: ${ufAtual}`, rightX, 65);
+
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(1);
+        doc.line(40, 80, 555, 80);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(30, 41, 59);
+        doc.text("Detalhes do Pedido", 40, 110);
+
+        // Prepare Table Data
+        const tableBody = carrinho.map(item => {
+            const prodOriginal = cacheEstados[ufAtual].find(p => p.sku === item.sku);
+            const preco = prodOriginal ? Number(prodOriginal[faixaManual.key]) : 0;
+            return [
+                item.nome,
+                item.sku,
+                item.qtd.toString(),
+                fmt(preco),
+                fmt(preco * item.qtd)
+            ];
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        doc.autoTable({
+            startY: 130,
+            head: [['Produto', 'SKU', 'Qtd', 'Unitário', 'Subtotal']],
+            body: tableBody,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [248, 250, 252],
+                textColor: [30, 41, 59],
+                fontStyle: 'bold',
+                lineColor: [226, 232, 240],
+                lineWidth: 1
+            },
+            bodyStyles: {
+                textColor: [71, 85, 105],
+                lineColor: [241, 245, 249],
+                lineWidth: 1
+            },
+            columnStyles: {
+                0: { fontStyle: 'bold', textColor: [30, 41, 59], cellWidth: 220 },
+                1: { halign: 'center', fontSize: 8 },
+                2: { halign: 'center', fontStyle: 'bold' },
+                3: { halign: 'right' },
+                4: { halign: 'right', fontStyle: 'bold', textColor: [120, 190, 32] }
+            },
+            margin: { left: 40, right: 40 }
+        });
 
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`pedido-simulador-${ufAtual}-${Date.now()}.pdf`);
+        const finalY = doc.lastAutoTable.finalY || 130;
+        
+        // Resumo Financeiro
+        let startY = finalY + 40;
+
+        // Check page break for the summary box
+        if (startY + 150 > doc.internal.pageSize.height) {
+            doc.addPage();
+            startY = 40;
+        }
+
+        // Draw Summary Box
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(300, startY, 255, 120, 6, 6, 'FD');
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Subtotal:", 320, startY + 25);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 41, 59);
+        doc.text(fmt(totalReal), 535, startY + 25, { align: 'right' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Total PV:", 320, startY + 45);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(120, 190, 32);
+        doc.text(totalPV.toFixed(2), 535, startY + 45, { align: 'right' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Desconto Ativo:", 320, startY + 65);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 41, 59);
+        doc.text(faixaManual.label, 535, startY + 65, { align: 'right' });
+
+        // Divider
+        doc.setDrawColor(203, 213, 225);
+        doc.line(320, startY + 80, 535, startY + 80);
+
+        // TOTAL
+        doc.setFontSize(14);
+        doc.setTextColor(120, 190, 32);
+        doc.text("TOTAL:", 320, startY + 105);
+        doc.text(fmt(totalReal), 535, startY + 105, { align: 'right' });
+
+        let infoY = startY + 160;
+
+        // Saldo Box se aplicável
+        if (temSaldoMensal) {
+            if (infoY + 60 > doc.internal.pageSize.height) {
+                doc.addPage();
+                infoY = 40;
+            }
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(120, 190, 32);
+            doc.setLineDashPattern([3, 3], 0);
+            doc.roundedRect(40, infoY, 515, 60, 6, 6, 'FD');
+            doc.setLineDashPattern([], 0); // reset
+
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 116, 139);
+            doc.text("Seu saldo total previsto de pontos de volume apos este pedido e de:", 297, infoY + 20, { align: 'center' });
+            
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(120, 190, 32);
+            doc.text(`${(saldoPontos + totalPV).toFixed(2)} PV`, 297, infoY + 40, { align: 'center' });
+            
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(148, 163, 184);
+            doc.text(`(Saldo Anterior: ${saldoPontos.toFixed(2)} PV + Pedido Atual: ${totalPV.toFixed(2)} PV)`, 297, infoY + 52, { align: 'center' });
+            
+            infoY += 80;
+        }
+
+        // Footer Message
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text("Simulador de Pedidos | Este documento e um resumo informativo oficial do simulador.", 297, doc.internal.pageSize.height - 20, { align: 'center' });
+
+        doc.save(`pedido-simulador-${ufAtual}-${Date.now()}.pdf`);
 
         if (loading) loading.style.display = 'none';
-        printArea.innerHTML = '';
-        printArea.style.visibility = 'hidden';
     } catch (err) {
         console.error("Erro ao gerar PDF:", err);
         alert("Ocorreu um erro ao gerar o arquivo PDF. Tente novamente.");
@@ -759,100 +806,87 @@ window.gerarListaPrecosPDF = async function() {
         loading.querySelector('span').textContent = 'Gerando Lista de Preços...';
     }
 
-    const dataHora = new Date().toLocaleString('pt-BR');
-
-    let printArea = document.getElementById('printAreaLista');
-    if (!printArea) {
-        printArea = document.createElement('div');
-        printArea.id = 'printAreaLista';
-        document.body.appendChild(printArea);
-    }
-    
-    printArea.style.cssText = "position: absolute; left: 0; top: 0; width: 1000px; background: white; padding: 40px; z-index: -9999; color: #1e293b; font-family: 'Inter', sans-serif; visibility: visible;";
-
-    printArea.innerHTML = `
-        <div style="border: 2px solid #78be20; padding: 30px; border-radius: 16px; background: #fff;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 30px;">
-                <div>
-                    <h1 style="color: #78be20; margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Lista de Preços</h1>
-                    <p style="font-size: 14px; color: #64748b; margin-top: 5px; font-weight: 600;">Simulador de Pedidos Herbalife</p>
-                </div>
-                <div style="text-align: right; font-size: 12px; color: #64748b; line-height: 1.6;">
-                    <div>Emitido em: <strong>${dataHora}</strong></div>
-                    <div>Estado Base: <strong>${ufAtual}</strong></div>
-                </div>
-            </div>
-
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px;">
-                <thead>
-                    <tr style="background: #f8fafc; text-align: left;">
-                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0; width: 35%;">Produto</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0; text-align: center;">SKU</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0; text-align: center;">PV</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0; text-align: right;">Consumidor</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0; text-align: right; color: #64748b;">25%</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0; text-align: right; color: #64748b;">35%</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0; text-align: right; color: #64748b;">42%</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0; text-align: right; color: #78be20;">50%</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${produtos.map(item => `
-                        <tr>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #1e293b;">${item.nome}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #64748b; font-size: 11px;">${item.sku}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: center; font-weight: 700;">${Number(item.pv || 0).toFixed(2)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${fmt(item.preco_consumidor)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">${fmt(item.preco_25)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">${fmt(item.preco_35)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">${fmt(item.preco_42)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #78be20;">${fmt(item.preco_50)}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-            
-            <div style="text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 20px;">
-                Tabela de Preços Oficial | Documento gerado automaticamente pelo Simulador de Pedidos.
-            </div>
-        </div>
-    `;
-
     try {
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 100));
 
-        const canvas = await html2canvas(printArea, {
-            scale: 1.5,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            logging: false
+        const doc = new jsPDF('p', 'pt', 'a4');
+        const dataHora = new Date().toLocaleString('pt-BR');
+
+        // Header Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(120, 190, 32); // #78be20
+        doc.text("LISTA DE PRECOS", 40, 50);
+
+        // Subtitle & Info
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139); // text-muted
+        doc.setFont('helvetica', 'normal');
+        doc.text("Simulador de Pedidos Herbalife", 40, 65);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Estado Base: ${ufAtual}`, 40, 85);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Emitido em: ${dataHora}`, 40, 100);
+
+        // Prepare Table Data
+        const tableBody = produtos.map(item => [
+            item.nome,
+            item.sku,
+            Number(item.pv || 0).toFixed(2),
+            fmt(item.preco_consumidor),
+            fmt(item.preco_25),
+            fmt(item.preco_35),
+            fmt(item.preco_42),
+            fmt(item.preco_50)
+        ]);
+
+        doc.autoTable({
+            startY: 120,
+            head: [['Produto', 'SKU', 'PV', 'Consumidor', '25%', '35%', '42%', '50%']],
+            body: tableBody,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [248, 250, 252],
+                textColor: [30, 41, 59],
+                fontStyle: 'bold',
+                lineColor: [226, 232, 240],
+                lineWidth: 1
+            },
+            bodyStyles: {
+                textColor: [71, 85, 105],
+                lineColor: [241, 245, 249],
+                lineWidth: 1
+            },
+            columnStyles: {
+                0: { fontStyle: 'bold', textColor: [30, 41, 59], cellWidth: 160 },
+                1: { halign: 'center', fontSize: 8 },
+                2: { halign: 'center', fontStyle: 'bold' },
+                3: { halign: 'right', fontStyle: 'bold' },
+                4: { halign: 'right' },
+                5: { halign: 'right' },
+                6: { halign: 'right' },
+                7: { halign: 'right', fontStyle: 'bold', textColor: [120, 190, 32] }
+            },
+            margin: { top: 40, left: 40, right: 40, bottom: 40 },
+            styles: {
+                font: 'helvetica',
+                fontSize: 9,
+                cellPadding: 5
+            },
+            didDrawPage: function (data) {
+                // Footer
+                doc.setFontSize(8);
+                doc.setTextColor(148, 163, 184);
+                const str = `Pagina ${data.pageCount}`;
+                doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 20);
+                doc.text("Tabela de Precos Oficial | Gerado pelo Simulador", doc.internal.pageSize.width - 220, doc.internal.pageSize.height - 20);
+            }
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.9);
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        let heightLeft = pdfHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-            position = heightLeft - pdfHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
-            heightLeft -= pageHeight;
-        }
-
-        pdf.save(`lista-precos-${ufAtual}-${Date.now()}.pdf`);
+        doc.save(`lista-precos-${ufAtual}-${Date.now()}.pdf`);
 
         if (loading) loading.style.display = 'none';
-        printArea.innerHTML = '';
-        printArea.style.visibility = 'hidden';
     } catch (err) {
         console.error("Erro ao gerar PDF da Lista:", err);
         alert("Ocorreu um erro ao gerar a Lista de Preços em PDF. Tente novamente.");

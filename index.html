@@ -325,29 +325,35 @@
             background: var(--primary-dark);
         }
 
-        .btn-pdf {
+        .btn-pdf-premium {
             width: 100%;
-            background: #27ae60; /* Verde PDF */
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             border-radius: 12px;
             font-weight: 800;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             margin-top: 1.5rem;
-            font-size: 1rem;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+            font-size: 1.05rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .btn-pdf:hover {
-            background: #219150;
+        .btn-pdf-premium:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.3);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            filter: brightness(1.1);
+        }
+        
+        .btn-pdf-premium:active {
+            transform: translateY(0);
         }
 
         @media print {
@@ -992,6 +998,7 @@
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1100,8 +1107,8 @@
                     <!-- Populado via JS -->
                 </select>
             </div>
-            <button onclick="gerarListaPrecosPDF()" class="btn-pdf" style="margin-top: 5px; padding: 0.75rem; font-size: 0.95rem; background: #1e293b; box-shadow: 0 4px 12px rgba(30, 41, 59, 0.2);">
-                <span>📋</span> Baixar Lista de Preços Completa (PDF)
+            <button onclick="gerarListaPrecosPDF()" class="btn-pdf-premium" style="margin-top: 5px;">
+                <span style="font-size: 1.3rem;">📄</span> Baixar Lista Completa (PDF)
             </button>
         </section>
 
@@ -1197,8 +1204,8 @@
                 <span id="resumoTotal">R$ 0,00</span>
             </div>
 
-            <button onclick="gerarPDF()" class="btn-pdf">
-                <span>🖨️</span> Imprimir / Salvar PDF
+            <button onclick="gerarPDF()" class="btn-pdf-premium">
+                <span style="font-size: 1.4rem;">🖨️</span> Gerar Recibo PDF
             </button>
         </div>
     </div>
