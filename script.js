@@ -623,8 +623,20 @@ window.gerarPDF = async function() {
         const doc = new jsPDF('p', 'pt', 'a4');
         const dataHora = new Date().toLocaleString('pt-BR');
         
-        const totalPV = carrinho.reduce((sum, item) => sum + (item.pv * item.qtd), 0);
-        const totalReal = carrinho.reduce((sum, item) => {
+        // Garantir array único agrupado por SKU antes de gerar
+        const carrinhoUnicoMap = {};
+        carrinho.forEach(item => {
+            const key = item.sku || item.nome;
+            if (carrinhoUnicoMap[key]) {
+                carrinhoUnicoMap[key].qtd += item.qtd;
+            } else {
+                carrinhoUnicoMap[key] = { ...item };
+            }
+        });
+        const carrinhoUnico = Object.values(carrinhoUnicoMap);
+
+        const totalPV = carrinhoUnico.reduce((sum, item) => sum + (item.pv * item.qtd), 0);
+        const totalReal = carrinhoUnico.reduce((sum, item) => {
             const prodOriginal = cacheEstados[ufAtual].find(p => p.sku === item.sku);
             const preco = prodOriginal ? Number(prodOriginal[faixaManual.key]) : 0;
             return sum + (preco * item.qtd);
@@ -658,7 +670,7 @@ window.gerarPDF = async function() {
         doc.text("Detalhes do Pedido", 40, 110);
 
         // Prepare Table Data
-        const tableBody = carrinho.map(item => {
+        const tableBody = carrinhoUnico.map(item => {
             const prodOriginal = cacheEstados[ufAtual].find(p => p.sku === item.sku);
             const preco = prodOriginal ? Number(prodOriginal[faixaManual.key]) : 0;
             return [
