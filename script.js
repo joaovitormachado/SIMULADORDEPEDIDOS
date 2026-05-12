@@ -47,6 +47,14 @@ const ESTADOS_BR = [
     'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
 ];
 
+function normalizarTexto(texto) {
+    if (!texto) return "";
+    return texto.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, "");
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Verificar Login
     const logado = sessionStorage.getItem('simulador_login');
@@ -119,14 +127,6 @@ function configurarEventos() {
         await carregarProdutosPorEstado(ufAtual);
         atualizarCarrinho();
     });
-
-    function normalizarTexto(texto) {
-        if (!texto) return "";
-        return texto.toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "") // remove acentos
-                    .replace(/[^a-z0-9]/g, ""); // remove caracteres não alfanuméricos (espaços, traços, etc)
-    }
 
     // Evento Busca
     let timeoutBusca;
@@ -797,18 +797,18 @@ window.gerarListaPrecosPDF = async function() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${produtos.map(item => \`
+                    ${produtos.map(item => `
                         <tr>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #1e293b;">\${item.nome}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #64748b; font-size: 11px;">\${item.sku}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: center; font-weight: 700;">\${Number(item.pv || 0).toFixed(2)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">\${fmt(item.preco_consumidor)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">\${fmt(item.preco_25)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">\${fmt(item.preco_35)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">\${fmt(item.preco_42)}</td>
-                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #78be20;">\${fmt(item.preco_50)}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #1e293b;">${item.nome}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #64748b; font-size: 11px;">${item.sku}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: center; font-weight: 700;">${Number(item.pv || 0).toFixed(2)}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${fmt(item.preco_consumidor)}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">${fmt(item.preco_25)}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">${fmt(item.preco_35)}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right;">${fmt(item.preco_42)}</td>
+                            <td style="padding: 8px 10px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #78be20;">${fmt(item.preco_50)}</td>
                         </tr>
-                    \`).join('')}
+                    `).join('')}
                 </tbody>
             </table>
             
@@ -816,7 +816,7 @@ window.gerarListaPrecosPDF = async function() {
                 Tabela de Preços Oficial | Documento gerado automaticamente pelo Simulador de Pedidos.
             </div>
         </div>
-    \`;
+    `;
 
     try {
         await new Promise(r => setTimeout(r, 500));
@@ -848,7 +848,7 @@ window.gerarListaPrecosPDF = async function() {
             heightLeft -= pageHeight;
         }
 
-        pdf.save(\`lista-precos-\${ufAtual}-\${Date.now()}.pdf\`);
+        pdf.save(`lista-precos-${ufAtual}-${Date.now()}.pdf`);
 
         if (loading) loading.style.display = 'none';
         printArea.innerHTML = '';
