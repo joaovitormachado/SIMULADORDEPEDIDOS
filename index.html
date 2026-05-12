@@ -357,6 +357,18 @@
             transform: translateY(0);
         }
 
+        .btn-pdf-secondary {
+            width: fit-content;
+            max-width: 500px;
+            margin: 15px auto 0 auto;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 1rem;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            font-weight: 700;
+        }
+
         @media print {
             body * { visibility: hidden; }
             #printArea, #printArea * { visibility: visible; }
@@ -1108,8 +1120,8 @@
                     <!-- Populado via JS -->
                 </select>
             </div>
-            <button onclick="gerarListaPrecosPDF()" class="btn-pdf-premium" style="margin-top: 5px;">
-                <span style="font-size: 1.3rem;">📄</span> BAIXAR LISTA COMPLETA (PDF)
+            <button onclick="gerarListaPrecosPDF()" class="btn-pdf-premium btn-pdf-secondary">
+                <span style="font-size: 1.1rem;">📄</span> BAIXAR LISTA COMPLETA (PDF)
             </button>
         </section>
 
