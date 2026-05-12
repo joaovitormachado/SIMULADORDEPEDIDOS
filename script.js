@@ -777,10 +777,23 @@ window.gerarPDF = async function() {
             infoY += 80;
         }
 
-        // Footer Message
-        doc.setFontSize(8);
-        doc.setTextColor(148, 163, 184);
-        doc.text("Simulador de Pedidos | Este documento e um resumo informativo oficial do simulador.", 297, doc.internal.pageSize.height - 20, { align: 'center' });
+        const totalPages = doc.internal.getNumberOfPages();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        for (let j = 1; j <= totalPages; j++) {
+            doc.setPage(j);
+            
+            // Footer Message
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text("Simulador de Pedidos | Este documento e um resumo informativo oficial do simulador.", pageWidth / 2, pageHeight - 20, { align: 'center' });
+
+            // Numeração de página
+            doc.setFontSize(10);
+            doc.setTextColor(120);
+            doc.text(`${j}/${totalPages}`, pageWidth - 40, pageHeight - 20, { align: 'right' });
+        }
 
         doc.save(`pedido-simulador-${ufAtual}-${Date.now()}.pdf`);
 
@@ -874,15 +887,25 @@ window.gerarListaPrecosPDF = async function() {
                 fontSize: 9,
                 cellPadding: 5
             },
-            didDrawPage: function (data) {
-                // Footer
-                doc.setFontSize(8);
-                doc.setTextColor(148, 163, 184);
-                const str = `Pagina ${data.pageCount}`;
-                doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 20);
-                doc.text("Tabela de Precos Oficial | Gerado pelo Simulador", doc.internal.pageSize.width - 220, doc.internal.pageSize.height - 20);
-            }
         });
+
+        const totalPages = doc.internal.getNumberOfPages();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        for (let j = 1; j <= totalPages; j++) {
+            doc.setPage(j);
+            
+            // Footer Message
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text("Tabela de Precos Oficial | Gerado pelo Simulador", pageWidth / 2, pageHeight - 20, { align: 'center' });
+
+            // Numeração de página
+            doc.setFontSize(10);
+            doc.setTextColor(120);
+            doc.text(`${j}/${totalPages}`, pageWidth - 40, pageHeight - 20, { align: 'right' });
+        }
 
         doc.save(`lista-precos-${ufAtual}-${Date.now()}.pdf`);
 
