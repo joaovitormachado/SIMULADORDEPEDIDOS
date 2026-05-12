@@ -98,7 +98,17 @@ async function carregarProdutosPorEstado(uf) {
         if (!res.ok) throw new Error(`Erro na API: ${res.status}`);
 
         const data = await res.json();
-        cacheEstados[uf] = data || [];
+        
+        // Deduplicar dados vindos do banco (Garante que nunca haja duplicidade globalmente)
+        const uniqueMap = {};
+        (data || []).forEach(item => {
+            const key = item.sku || item.nome;
+            if (!uniqueMap[key]) {
+                uniqueMap[key] = item;
+            }
+        });
+        
+        cacheEstados[uf] = Object.values(uniqueMap);
         renderProdutos();
     } catch (err) {
         exibirErro(`Erro ao carregar produtos de ${uf}: ` + err.message);
@@ -854,8 +864,18 @@ window.gerarListaPrecosPDF = async function() {
         doc.setFont('helvetica', 'normal');
         doc.text(`Emitido em: ${dataHora}`, 40, 100);
 
+        // Garantir deduplicação final para a Lista de Preços
+        const produtosUnicosMap = {};
+        produtos.forEach(item => {
+            const key = item.sku || item.nome;
+            if (!produtosUnicosMap[key]) {
+                produtosUnicosMap[key] = item;
+            }
+        });
+        const produtosUnicos = Object.values(produtosUnicosMap);
+
         // Prepare Table Data
-        const tableBody = produtos.map(item => [
+        const tableBody = produtosUnicos.map(item => [
             item.nome,
             item.sku,
             Number(item.pv || 0).toFixed(2),
