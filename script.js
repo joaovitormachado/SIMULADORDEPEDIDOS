@@ -42,6 +42,1200 @@ function getFaixaPorPV(pv, maxPerc = 50) {
     return FAIXAS[0];                 // 25%
 }
 
+const PROTEIN_COMPLETE_DATA = [
+  {
+    "estado": "AC",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 189.04,
+    "preco_35": 167.75,
+    "preco_42": 152.85,
+    "preco_50": 135.82
+  },
+  {
+    "estado": "AC",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 189.04,
+    "preco_35": 167.75,
+    "preco_42": 152.85,
+    "preco_50": 135.82
+  },
+  {
+    "estado": "AC",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 189.04,
+    "preco_35": 167.75,
+    "preco_42": 152.85,
+    "preco_50": 135.82
+  },
+  {
+    "estado": "AL",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.25,
+    "preco_35": 168.17,
+    "preco_42": 156.92,
+    "preco_50": 144.05
+  },
+  {
+    "estado": "AL",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.25,
+    "preco_35": 168.17,
+    "preco_42": 156.92,
+    "preco_50": 144.05
+  },
+  {
+    "estado": "AL",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.25,
+    "preco_35": 168.17,
+    "preco_42": 156.92,
+    "preco_50": 144.05
+  },
+  {
+    "estado": "AM",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 196.34,
+    "preco_35": 174.23,
+    "preco_42": 158.76,
+    "preco_50": 141.07
+  },
+  {
+    "estado": "AM",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 196.34,
+    "preco_35": 174.23,
+    "preco_42": 158.76,
+    "preco_50": 141.07
+  },
+  {
+    "estado": "AM",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 196.34,
+    "preco_35": 174.23,
+    "preco_42": 158.76,
+    "preco_50": 141.07
+  },
+  {
+    "estado": "AP",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.56,
+    "preco_35": 163.78,
+    "preco_42": 149.23,
+    "preco_50": 132.6
+  },
+  {
+    "estado": "AP",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.56,
+    "preco_35": 163.78,
+    "preco_42": 149.23,
+    "preco_50": 132.6
+  },
+  {
+    "estado": "AP",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.56,
+    "preco_35": 163.78,
+    "preco_42": 149.23,
+    "preco_50": 132.6
+  },
+  {
+    "estado": "BA",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 179.62,
+    "preco_35": 159.39,
+    "preco_42": 145.23,
+    "preco_50": 129.05
+  },
+  {
+    "estado": "BA",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 179.62,
+    "preco_35": 159.39,
+    "preco_42": 145.23,
+    "preco_50": 129.05
+  },
+  {
+    "estado": "BA",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 179.62,
+    "preco_35": 159.39,
+    "preco_42": 145.23,
+    "preco_50": 129.05
+  },
+  {
+    "estado": "CE",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 158.39,
+    "preco_42": 144.32,
+    "preco_50": 128.24
+  },
+  {
+    "estado": "CE",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 158.39,
+    "preco_42": 144.32,
+    "preco_50": 128.24
+  },
+  {
+    "estado": "CE",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 158.39,
+    "preco_42": 144.32,
+    "preco_50": 128.24
+  },
+  {
+    "estado": "DF",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.99,
+    "preco_35": 164.15,
+    "preco_42": 149.57,
+    "preco_50": 132.91
+  },
+  {
+    "estado": "DF",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.99,
+    "preco_35": 164.15,
+    "preco_42": 149.57,
+    "preco_50": 132.91
+  },
+  {
+    "estado": "DF",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.99,
+    "preco_35": 164.15,
+    "preco_42": 149.57,
+    "preco_50": 132.91
+  },
+  {
+    "estado": "ES",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.03,
+    "preco_35": 157.99,
+    "preco_42": 143.95,
+    "preco_50": 127.91
+  },
+  {
+    "estado": "ES",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.03,
+    "preco_35": 157.99,
+    "preco_42": 143.95,
+    "preco_50": 127.91
+  },
+  {
+    "estado": "ES",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.03,
+    "preco_35": 157.99,
+    "preco_42": 143.95,
+    "preco_50": 127.91
+  },
+  {
+    "estado": "GO",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 193.04,
+    "preco_35": 171.3,
+    "preco_42": 156.08,
+    "preco_50": 138.69
+  },
+  {
+    "estado": "GO",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 193.04,
+    "preco_35": 171.3,
+    "preco_42": 156.08,
+    "preco_50": 138.69
+  },
+  {
+    "estado": "GO",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 193.04,
+    "preco_35": 171.3,
+    "preco_42": 156.08,
+    "preco_50": 138.69
+  },
+  {
+    "estado": "MA",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 185.45,
+    "preco_35": 169.37,
+    "preco_42": 158.11,
+    "preco_50": 145.25
+  },
+  {
+    "estado": "MA",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 185.45,
+    "preco_35": 169.37,
+    "preco_42": 158.11,
+    "preco_50": 145.25
+  },
+  {
+    "estado": "MA",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 185.45,
+    "preco_35": 169.37,
+    "preco_42": 158.11,
+    "preco_50": 145.25
+  },
+  {
+    "estado": "MG",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 186.68,
+    "preco_35": 165.66,
+    "preco_42": 150.94,
+    "preco_50": 134.12
+  },
+  {
+    "estado": "MG",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 186.68,
+    "preco_35": 165.66,
+    "preco_42": 150.94,
+    "preco_50": 134.12
+  },
+  {
+    "estado": "MG",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 186.68,
+    "preco_35": 165.66,
+    "preco_42": 150.94,
+    "preco_50": 134.12
+  },
+  {
+    "estado": "MS",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 172.04,
+    "preco_35": 155.96,
+    "preco_42": 144.71,
+    "preco_50": 131.84
+  },
+  {
+    "estado": "MS",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 172.04,
+    "preco_35": 155.96,
+    "preco_42": 144.71,
+    "preco_50": 131.84
+  },
+  {
+    "estado": "MS",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 172.04,
+    "preco_35": 155.96,
+    "preco_42": 144.71,
+    "preco_50": 131.84
+  },
+  {
+    "estado": "MT",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.39,
+    "preco_35": 162.74,
+    "preco_42": 148.29,
+    "preco_50": 131.76
+  },
+  {
+    "estado": "MT",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.39,
+    "preco_35": 162.74,
+    "preco_42": 148.29,
+    "preco_50": 131.76
+  },
+  {
+    "estado": "MT",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.39,
+    "preco_35": 162.74,
+    "preco_42": 148.29,
+    "preco_50": 131.76
+  },
+  {
+    "estado": "PA",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 193.04,
+    "preco_35": 171.3,
+    "preco_42": 156.08,
+    "preco_50": 138.69
+  },
+  {
+    "estado": "PA",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 193.04,
+    "preco_35": 171.3,
+    "preco_42": 156.08,
+    "preco_50": 138.69
+  },
+  {
+    "estado": "PA",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 193.04,
+    "preco_35": 171.3,
+    "preco_42": 156.08,
+    "preco_50": 138.69
+  },
+  {
+    "estado": "PB",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "PB",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "PB",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "PE",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 179.62,
+    "preco_35": 163.54,
+    "preco_42": 152.28,
+    "preco_50": 139.42
+  },
+  {
+    "estado": "PE",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 179.62,
+    "preco_35": 163.54,
+    "preco_42": 152.28,
+    "preco_50": 139.42
+  },
+  {
+    "estado": "PE",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 179.62,
+    "preco_35": 163.54,
+    "preco_42": 152.28,
+    "preco_50": 139.42
+  },
+  {
+    "estado": "PI",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.25,
+    "preco_35": 168.17,
+    "preco_42": 156.92,
+    "preco_50": 144.05
+  },
+  {
+    "estado": "PI",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.25,
+    "preco_35": 168.17,
+    "preco_42": 156.92,
+    "preco_50": 144.05
+  },
+  {
+    "estado": "PI",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 184.25,
+    "preco_35": 168.17,
+    "preco_42": 156.92,
+    "preco_50": 144.05
+  },
+  {
+    "estado": "PR",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 177.39,
+    "preco_35": 161.31,
+    "preco_42": 150.05,
+    "preco_50": 137.19
+  },
+  {
+    "estado": "PR",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 177.39,
+    "preco_35": 161.31,
+    "preco_42": 150.05,
+    "preco_50": 137.19
+  },
+  {
+    "estado": "PR",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 177.39,
+    "preco_35": 161.31,
+    "preco_42": 150.05,
+    "preco_50": 137.19
+  },
+  {
+    "estado": "RJ",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.07,
+    "preco_35": 162.46,
+    "preco_42": 148.02,
+    "preco_50": 131.53
+  },
+  {
+    "estado": "RJ",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.07,
+    "preco_35": 162.46,
+    "preco_42": 148.02,
+    "preco_50": 131.53
+  },
+  {
+    "estado": "RJ",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.07,
+    "preco_35": 162.46,
+    "preco_42": 148.02,
+    "preco_50": 131.53
+  },
+  {
+    "estado": "RN",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 188.23,
+    "preco_35": 167.03,
+    "preco_42": 152.2,
+    "preco_50": 135.24
+  },
+  {
+    "estado": "RN",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 188.23,
+    "preco_35": 167.03,
+    "preco_42": 152.2,
+    "preco_50": 135.24
+  },
+  {
+    "estado": "RN",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 188.23,
+    "preco_35": 167.03,
+    "preco_42": 152.2,
+    "preco_50": 135.24
+  },
+  {
+    "estado": "RO",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 177.39,
+    "preco_35": 161.31,
+    "preco_42": 150.05,
+    "preco_50": 137.19
+  },
+  {
+    "estado": "RO",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 177.39,
+    "preco_35": 161.31,
+    "preco_42": 150.05,
+    "preco_50": 137.19
+  },
+  {
+    "estado": "RO",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 177.39,
+    "preco_35": 161.31,
+    "preco_42": 150.05,
+    "preco_50": 137.19
+  },
+  {
+    "estado": "RR",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "RR",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "RR",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "RS",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.04,
+    "preco_35": 162.43,
+    "preco_42": 148,
+    "preco_50": 131.51
+  },
+  {
+    "estado": "RS",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.04,
+    "preco_35": 162.43,
+    "preco_42": 148,
+    "preco_50": 131.51
+  },
+  {
+    "estado": "RS",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 183.04,
+    "preco_35": 162.43,
+    "preco_42": 148,
+    "preco_50": 131.51
+  },
+  {
+    "estado": "SC",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 172.04,
+    "preco_35": 155.96,
+    "preco_42": 144.71,
+    "preco_50": 131.84
+  },
+  {
+    "estado": "SC",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 172.04,
+    "preco_35": 155.96,
+    "preco_42": 144.71,
+    "preco_50": 131.84
+  },
+  {
+    "estado": "SC",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 172.04,
+    "preco_35": 155.96,
+    "preco_42": 144.71,
+    "preco_50": 131.84
+  },
+  {
+    "estado": "SE",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "SE",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "SE",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 178.5,
+    "preco_35": 162.41,
+    "preco_42": 151.16,
+    "preco_50": 138.29
+  },
+  {
+    "estado": "SP",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 180.57,
+    "preco_35": 160.23,
+    "preco_42": 146,
+    "preco_50": 129.73
+  },
+  {
+    "estado": "SP",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 180.57,
+    "preco_35": 160.23,
+    "preco_42": 146,
+    "preco_50": 129.73
+  },
+  {
+    "estado": "SP",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 180.57,
+    "preco_35": 160.23,
+    "preco_42": 146,
+    "preco_50": 129.73
+  },
+  {
+    "estado": "TO",
+    "sku": "613K",
+    "nome": "Protein Complete 550g Baunilha",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 188.23,
+    "preco_35": 167.03,
+    "preco_42": 152.2,
+    "preco_50": 135.24
+  },
+  {
+    "estado": "TO",
+    "sku": "612K",
+    "nome": "Protein Complete 550g Chocolate",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 188.23,
+    "preco_35": 167.03,
+    "preco_42": 152.2,
+    "preco_50": 135.24
+  },
+  {
+    "estado": "TO",
+    "sku": "614K",
+    "nome": "Protein Complete 550g Morango",
+    "pv": 25.75,
+    "preco_consumidor": 246,
+    "preco_25": 188.23,
+    "preco_35": 167.03,
+    "preco_42": 152.2,
+    "preco_50": 135.24
+  }
+];
+
+const GOLDEN_BEVERAGE_DATA = [
+  {
+    "estado": "AC",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 157.63,
+    "preco_35": 140.16,
+    "preco_42": 127.92,
+    "preco_50": 113.94
+  },
+  {
+    "estado": "AL",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 153.64,
+    "preco_35": 140.44,
+    "preco_42": 131.2,
+    "preco_50": 120.64
+  },
+  {
+    "estado": "AM",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 163.72,
+    "preco_35": 145.57,
+    "preco_42": 132.86,
+    "preco_50": 118.35
+  },
+  {
+    "estado": "AP",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 153.9,
+    "preco_35": 136.83,
+    "preco_42": 124.89,
+    "preco_50": 111.24
+  },
+  {
+    "estado": "BA",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 149.77,
+    "preco_35": 133.17,
+    "preco_42": 121.55,
+    "preco_50": 108.26
+  },
+  {
+    "estado": "CE",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 148.83,
+    "preco_35": 132.34,
+    "preco_42": 120.79,
+    "preco_50": 107.59
+  },
+  {
+    "estado": "DF",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 154.25,
+    "preco_35": 137.15,
+    "preco_42": 125.18,
+    "preco_50": 111.5
+  },
+  {
+    "estado": "ES",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 148.45,
+    "preco_35": 131.99,
+    "preco_42": 120.47,
+    "preco_50": 107.31
+  },
+  {
+    "estado": "GO",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 160.96,
+    "preco_35": 143.12,
+    "preco_42": 130.63,
+    "preco_50": 116.35
+  },
+  {
+    "estado": "MA",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 154.63,
+    "preco_35": 141.43,
+    "preco_42": 132.19,
+    "preco_50": 121.64
+  },
+  {
+    "estado": "MG",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 155.66,
+    "preco_35": 138.4,
+    "preco_42": 126.32,
+    "preco_50": 112.52
+  },
+  {
+    "estado": "MS",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 143.46,
+    "preco_35": 130.26,
+    "preco_42": 121.02,
+    "preco_50": 110.46
+  },
+  {
+    "estado": "MT",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 152.92,
+    "preco_35": 135.97,
+    "preco_42": 124.1,
+    "preco_50": 110.54
+  },
+  {
+    "estado": "PA",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 160.96,
+    "preco_35": 143.12,
+    "preco_42": 130.63,
+    "preco_50": 116.35
+  },
+  {
+    "estado": "PB",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 148.83,
+    "preco_35": 135.64,
+    "preco_42": 126.4,
+    "preco_50": 115.84
+  },
+  {
+    "estado": "PE",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 149.77,
+    "preco_35": 136.57,
+    "preco_42": 127.33,
+    "preco_50": 116.77
+  },
+  {
+    "estado": "PI",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 153.64,
+    "preco_35": 140.44,
+    "preco_42": 131.2,
+    "preco_50": 120.64
+  },
+  {
+    "estado": "PR",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 147.91,
+    "preco_35": 134.71,
+    "preco_42": 125.47,
+    "preco_50": 114.91
+  },
+  {
+    "estado": "RJ",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 152.65,
+    "preco_35": 135.73,
+    "preco_42": 123.88,
+    "preco_50": 110.35
+  },
+  {
+    "estado": "RN",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 156.95,
+    "preco_35": 139.55,
+    "preco_42": 127.37,
+    "preco_50": 113.46
+  },
+  {
+    "estado": "RO",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 147.91,
+    "preco_35": 134.71,
+    "preco_42": 125.47,
+    "preco_50": 114.91
+  },
+  {
+    "estado": "RR",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 148.83,
+    "preco_35": 135.64,
+    "preco_42": 126.4,
+    "preco_50": 115.84
+  },
+  {
+    "estado": "RS",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 152.62,
+    "preco_35": 135.71,
+    "preco_42": 123.86,
+    "preco_50": 110.33
+  },
+  {
+    "estado": "SC",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 143.46,
+    "preco_35": 130.26,
+    "preco_42": 121.02,
+    "preco_50": 110.46
+  },
+  {
+    "estado": "SE",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 148.83,
+    "preco_35": 135.64,
+    "preco_42": 126.4,
+    "preco_50": 115.84
+  },
+  {
+    "estado": "SP",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 145.2,
+    "preco_35": 129.11,
+    "preco_42": 117.84,
+    "preco_50": 104.96
+  },
+  {
+    "estado": "TO",
+    "sku": "238K",
+    "nome": "Golden Beverage – 15 sachês",
+    "pv": 20.25,
+    "preco_consumidor": 195,
+    "preco_25": 156.95,
+    "preco_35": 139.55,
+    "preco_42": 127.37,
+    "preco_50": 113.46
+  }
+];
+
 const ESTADOS_BR = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 
     'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
@@ -99,9 +1293,14 @@ async function carregarProdutosPorEstado(uf) {
 
         const data = await res.json();
         
-        // Deduplicar dados vindos do banco (Garante que nunca haja duplicidade globalmente)
+        // Mesclar dados do banco + locais (garantindo que se já existir no banco, o do banco tem precedência)
+        const pcEstado = PROTEIN_COMPLETE_DATA.filter(p => p.estado === uf);
+        const gbEstado = GOLDEN_BEVERAGE_DATA.filter(p => p.estado === uf);
+        const combined = [...(data || []), ...pcEstado, ...gbEstado];
+
+        // Deduplicar dados vindos do banco/local (Garante que nunca haja duplicidade globalmente por SKU ou Nome)
         const uniqueMap = {};
-        (data || []).forEach(item => {
+        combined.forEach(item => {
             const key = item.sku || item.nome;
             if (!uniqueMap[key]) {
                 uniqueMap[key] = item;
